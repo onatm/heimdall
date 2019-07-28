@@ -1,8 +1,9 @@
 import express from 'express';
+import handleDiscovery from '../handlers/discovery';
 
 const router = express.Router();
 
-router.get('/.well-known/openid-configuration', (req, res) => res.send({ hello: "world!" }));
+router.get('/.well-known/openid-configuration', handleDiscovery);
 router.get('/token', (req, res) => res.send({ hello: "world!" }));
 router.get('/keys', (req, res) => res.send({ hello: "world!" }));
 router.get('/userinfo', (req, res) => res.send({ hello: "world!" }));
