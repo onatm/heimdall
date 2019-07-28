@@ -1,0 +1,24 @@
+{
+  "name": "heimdall",
+  "version": "0.1.0",
+  "description": "OpenID Connect Identity (OIDC) and OAuth 2.0 Provider",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node index.js"
+  },
+  "keywords": [
+    "oidc",
+    "oauth2"
+  ],
+  "author": "onatm",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/polyfill": "7.4.4",
+    "express": "4.17.1"
+  },
+  "devDependencies": {
+    "@babel/core": "7.5.5",
+    "@babel/node": "7.5.5",
+    "@babel/preset-env": "7.5.5"
+  }
+}
