@@ -1,10 +1,13 @@
 import '@babel/polyfill';
 import http from 'http';
-import app from './src/app.js';
+import App from './src/app';
+import Handler from './src/handlers';
 
 const port = process.env.PORT || '3000';
+const issuerURL = "http://localhost:3000";
 
-app.set('port', port);
+const handler = new Handler({ issuerURL });
+const app = new App({ handler, port }).get();
 
 const server = http.createServer(app);
 server.listen(port);
