@@ -5,20 +5,20 @@ class Handler {
   }
 
   async discoveryHandler(_, res) {
-    const { issuerURL } = this.config;
+    const { issuer, responseTypes } = this.config;
 
     const discovery = {
-      issuer: issuerURL,
-      authorization_endpoint: `${issuerURL}/auth`,
-      token_endpoint: `${issuerURL}/token`,
-      jwks_uri: `${issuerURL}/keys`,
-      userinfo_endpoint: `${issuerURL}/userinfo`,
-      response_types_supported: [""],
-      subject_types_supported: [""],
-      id_token_signing_alg_values_supported: [""],
-      scopes_supported: [""],
-      token_endpoint_auth_methods_supported: [""],
-      claims_supported: [""]
+      issuer: issuer,
+      authorization_endpoint: `${issuer}/auth`,
+      token_endpoint: `${issuer}/token`,
+      jwks_uri: `${issuer}/keys`,
+      userinfo_endpoint: `${issuer}/userinfo`,
+      response_types_supported: responseTypes,
+      subject_types_supported: ["public"],
+      id_token_signing_alg_values_supported: ["RS256"],
+      scopes_supported: ["openid", "email", "groups", "profile", "offline_access"],
+      token_endpoint_auth_methods_supported: ["client_secret_basic"],
+      claims_supported: ["aud", "email", "email_verified", "exp", "iat", "iss", "locale", "name", "sub"]
     };
 
     res.json(discovery);

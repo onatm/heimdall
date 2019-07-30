@@ -4,9 +4,11 @@ import App from './src/app';
 import Handler from './src/handlers';
 
 const port = process.env.PORT || '3000';
-const issuerURL = "http://localhost:3000";
+const issuer = "http://localhost:3000";
+const responseTypes = ["code", "id_token"];
+responseTypes.sort();
 
-const handler = new Handler({ issuerURL });
+const handler = new Handler({ issuer, responseTypes });
 const app = new App({ handler, port }).get();
 
 const server = http.createServer(app);
