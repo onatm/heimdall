@@ -11,7 +11,7 @@ class Handler {
       issuer: issuer,
       authorization_endpoint: `${issuer}/auth`,
       token_endpoint: `${issuer}/token`,
-      jwks_uri: `${issuer}/keys`,
+      jwks_uri: `${issuer}/jwks`,
       userinfo_endpoint: `${issuer}/userinfo`,
       response_types_supported: responseTypes,
       subject_types_supported: ["public"],

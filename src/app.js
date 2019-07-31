@@ -9,7 +9,7 @@ class App {
 
     router.get('/.well-known/openid-configuration', handler.discoveryHandler);
     router.get('/token', (req, res) => res.send({ hello: "world!" }));
-    router.get('/keys', (req, res) => res.send({ hello: "world!" }));
+    router.get('/jwks', (req, res) => res.send({ hello: "world!" }));
     router.get('/userinfo', (req, res) => res.send({ hello: "world!" }));
     router.get('/auth', (req, res) => res.send({ hello: "world!" }));
     router.get('/auth/:upstream', (req, res) => res.send({ hello: "world!" }));
