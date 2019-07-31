@@ -11,7 +11,7 @@ class App {
     router.get('/token', (req, res) => res.send({ hello: "world!" }));
     router.get('/jwks', (req, res) => res.send({ hello: "world!" }));
     router.get('/userinfo', (req, res) => res.send({ hello: "world!" }));
-    router.get('/auth', (req, res) => res.send({ hello: "world!" }));
+    router.get('/auth', handler.authorizationHandler);
     router.get('/auth/:upstream', (req, res) => res.send({ hello: "world!" }));
     router.get('/auth/callback', (req, res) => res.send({ hello: "world!" }));
     router.get('/auth/callback/:upstream', (req, res) => res.send({ hello: "world!" }));

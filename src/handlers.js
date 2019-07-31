@@ -23,6 +23,10 @@ class Handler {
 
     res.json(discovery);
   }
+
+  async authorizationHandler(req, res) {
+    res.json({ hello: "world" })
+  }
 }
 
 export default Handler;
