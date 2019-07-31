@@ -4,7 +4,7 @@ class Handler {
     this.discoveryHandler = this.discoveryHandler.bind(this);
   }
 
-  async discoveryHandler(_, res) {
+  discoveryHandler = async (_, res) => {
     const { issuer, responseTypes } = this.config;
 
     const discovery = {
@@ -24,7 +24,7 @@ class Handler {
     res.json(discovery);
   }
 
-  async authorizationHandler(req, res) {
+  authorizationHandler = async (req, res) => {
     res.render("authorization", {});
   }
 }

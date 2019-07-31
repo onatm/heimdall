@@ -26,7 +26,7 @@ class App {
     this.app.use('/', router);
   }
 
-  get() {
+  get = () => {
     return this.app;
   }
 }
