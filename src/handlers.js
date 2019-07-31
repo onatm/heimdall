@@ -25,7 +25,7 @@ class Handler {
   }
 
   async authorizationHandler(req, res) {
-    res.json({ hello: "world" })
+    res.render("authorization", {});
   }
 }
 
