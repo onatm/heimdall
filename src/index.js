@@ -1,7 +1,7 @@
 import '@babel/polyfill';
 import http from 'http';
-import App from './src/app';
-import Handler from './src/handlers';
+import App from './app';
+import Handler from './handlers';
 
 const port = process.env.PORT || '3000';
 const issuer = "http://localhost:3000";

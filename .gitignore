@@ -76,4 +76,4 @@ typings/
 *.code-workspace
 
 # build output
-.build
+dist

@@ -4,7 +4,8 @@
   "description": "OpenID Connect Identity (OIDC) and OAuth 2.0 Provider",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node index.js"
+    "start": "babel-node src/index.js",
+    "build": "babel src -D -d dist"
   },
   "keywords": [
     "oidc",
@@ -20,6 +21,7 @@
     "react-dom": "16.8.6"
   },
   "devDependencies": {
+    "@babel/cli": "7.5.5",
     "@babel/core": "7.5.5",
     "@babel/node": "7.5.5",
     "@babel/plugin-proposal-class-properties": "7.5.5",
