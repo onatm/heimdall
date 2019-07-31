@@ -1,9 +1,14 @@
 import express from 'express';
+import reactViews from 'express-react-views';
 
 class App {
   constructor({ handler, port } = opts) {
     this.app = express();
     this.app.set('port', port);
+
+    this.app.set('views', __dirname + '/views');
+    this.app.set('view engine', 'jsx');
+    this.app.engine('jsx', reactViews.createEngine());
 
     const router = express.Router();
 
