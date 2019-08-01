@@ -1,10 +1,12 @@
 import express from 'express';
+import cors from 'cors';
 import reactViews from 'express-react-views';
 
 class App {
   constructor({ handler, port } = opts) {
     this.app = express();
     this.app.set('port', port);
+    this.app.use(cors());
 
     this.app.set('views', __dirname + '/views');
     this.app.set('view engine', 'jsx');
