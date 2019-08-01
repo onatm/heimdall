@@ -3,8 +3,8 @@ import http from 'http';
 import App from './app';
 import Handler from './handlers';
 
-const port = process.env.PORT || '3000';
-const issuer = "http://localhost:3000";
+const port = process.env.PORT || '5666';
+const issuer = "http://localhost:5666";
 const responseTypes = ["code", "id_token"];
 responseTypes.sort();
 
