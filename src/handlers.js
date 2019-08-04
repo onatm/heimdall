@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import nanoid from 'nanoid';
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
@@ -171,7 +172,9 @@ class Handler {
 
     // TODO: check nonce for implicit flow
 
-    return { id: generateId(25), client, responseTypes, scopes, state, nonce, redirectURI };
+    const id = nanoid();
+
+    return { id, client, responseTypes, scopes, state, nonce, redirectURI };
   }
 }
 
@@ -181,20 +184,6 @@ const parseAsArray = (str) => {
   }
 
   return str.split(" ");
-}
-
-const generateId = (length) => {
-  const chars = 'abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789';
-  const rnd = crypto.randomBytes(length)
-  const value = new Array(length)
-  let len = len = Math.min(256, chars.length)
-  const d = 256 / len
-
-  for (let i = 0; i < length; i++) {
-    value[i] = chars[Math.floor(rnd[i] / d)]
-  };
-
-  return value.join('');
 }
 
 export default Handler;
