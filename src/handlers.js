@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import ClientOAuth2 from 'client-oauth2';
 
 class Handler {
-  constructor(config = { issuerURL }, store = { getClientById, getProviders, createAuthRequest }) {
+  constructor(config = { issuerURL }, store = { getClient, getProviders, getProvider, getAuthReq, createAuthReq }) {
     this.config = config;
     this.store = store;
   }
@@ -33,14 +34,36 @@ class Handler {
       return res.render("error", { error: authReq.error })
     }
 
-    authReq.Expiry = "some time in the future";
-    this.store.createAuthRequest(authReq);
+    authReq.expiry = "some time in the future";
+    this.store.createAuthReq(authReq);
 
     const providers = this.store.getProviders();
 
     const providerInfos = providers.map(p => { return ({ id: p.id, name: p.name, url: `/auth/${p.id}?req=${authReq.id}` }) });
 
     res.render("authorization", { providerInfos });
+  }
+
+  providerHandler = async (req, res) => {
+    const providerId = req.params.provider;
+
+    const provider = this.store.getProvider(providerId);
+
+    const authReqId = req.query.req;
+
+    const authReq = this.store.getAuthReq(authReqId);
+
+    const githubAuth = new ClientOAuth2({
+      clientId: provider.config.clientId,
+      clientSecret: provider.config.clientSecret,
+      accessTokenUri: 'https://github.com/login/oauth/access_token',
+      authorizationUri: 'https://github.com/login/oauth/authorize',
+      redirectUri: `http://localhost:5556/auth/callback`,
+      state: authReqId,
+      scopes: authReq.scopes
+    });
+
+    res.redirect(githubAuth.code.getUri());
   }
 
   parseAuthorizationRequest = (q) => {
@@ -59,7 +82,7 @@ class Handler {
       return { error: "No client_id provided." }
     }
 
-    const client = this.store.getClientById(clientId);
+    const client = this.store.getClient(clientId);
 
     if (!client) {
       return { error: `Invalid client_id (${clientId})` };
