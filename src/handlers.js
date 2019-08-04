@@ -1,8 +1,11 @@
 import crypto from 'crypto';
 import ClientOAuth2 from 'client-oauth2';
+import axios from 'axios';
 
 class Handler {
-  constructor(config = { issuerURL }, store = { getClient, getProviders, getProvider, getAuthReq, createAuthReq }) {
+  constructor(
+    config = { issuerURL },
+    store = { getClient, getProviders, getProvider, getAuthReq, createAuthReq, updateAuthReq }) {
     this.config = config;
     this.store = store;
   }
@@ -54,6 +57,9 @@ class Handler {
     const authReqId = req.query.req;
 
     const authReq = this.store.getAuthReq(authReqId);
+    authReq.providerId = provider.id;
+
+    this.store.updateAuthReq(authReq);
 
     const githubAuth = new ClientOAuth2({
       clientId: provider.config.clientId,
@@ -69,7 +75,56 @@ class Handler {
   }
 
   providerCallbackHandler = async (req, res) => {
-    res.json({ code: req.query.code });
+    const { issuer } = this.config;
+
+    const authReqId = req.query.state;
+
+    if (!authReqId) {
+      return res.render("error", { error: "User session error." })
+    }
+
+    const authReq = this.store.getAuthReq(authReqId);
+
+    if (!authReq) {
+      return res.render("error", { error: "Invalid 'state' parameter provided: not found" })
+    }
+
+    const providerId = req.params.provider;
+
+    if (providerId !== authReq.providerId) {
+      return res.render("error", { error: `Provider mismatch: authentication started with id ${authReq.providerId}, but callback for id ${providerId} was triggered` })
+    }
+
+    const provider = this.store.getProvider(providerId);
+
+    const githubAuth = new ClientOAuth2({
+      clientId: provider.config.clientId,
+      clientSecret: provider.config.clientSecret,
+      accessTokenUri: 'https://github.com/login/oauth/access_token',
+      authorizationUri: 'https://github.com/login/oauth/authorize',
+      redirectUri: `${issuer}/auth/${provider.id}/callback`,
+      state: authReq.id,
+      scopes: authReq.scopes
+    });
+
+    const token = await githubAuth.code.getToken(req.originalUrl);
+
+    // res.json({
+    //   access_token: user.accessToken,
+    //   refresh_token: user.refreshToken,
+    //   token_type: user.tokenType
+    // });
+
+    const githubApiUrl = "https://api.github.com/api/v3";
+
+    const userReq = token.sign({
+      method: 'GET',
+      url: 'https://api.github.com/user'
+    });
+
+    const user = await axios(userReq);
+
+    return res.json(user.data);
   }
 
   parseAuthorizationRequest = (q) => {

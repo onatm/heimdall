@@ -25,8 +25,14 @@ class Store {
     return this.authRequests.find(a => a.id === id);
   }
 
-  createAuthReq = (authReq = { id, client, responseTypes, scopes, state, nonce, redirectURI, expiry }) => {
+  createAuthReq = (authReq = { id, client, responseTypes, scopes, state, nonce, redirectURI, expiry, providerId }) => {
     this.authRequests.push(authReq);
+  }
+
+  updateAuthReq = (authReq = { id, client, responseTypes, scopes, state, nonce, redirectURI, expiry, providerId }) => {
+    const index = this.authRequests.findIndex(a => a.id === authReq.id);
+
+    this.authRequests[index] = authReq;
   }
 }
 
