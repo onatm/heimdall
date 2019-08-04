@@ -20,8 +20,7 @@ const providers = [
     name: "GitHub",
     config: {
       clientId: "",
-      clientSecret: "",
-      redirectURI: "http://localhost:5556/auth/callback"
+      clientSecret: ""
     }
   }
 ];

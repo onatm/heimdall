@@ -58,8 +58,8 @@ class Handler {
       clientSecret: provider.config.clientSecret,
       accessTokenUri: 'https://github.com/login/oauth/access_token',
       authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `http://localhost:5556/auth/callback`,
-      state: authReqId,
+      redirectUri: `http://localhost:5556/auth/${provider.id}/callback`,
+      state: authReq.id,
       scopes: authReq.scopes
     });
 
