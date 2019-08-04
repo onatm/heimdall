@@ -1,5 +1,5 @@
 class Store {
-  constructor(config = { clients, providers }) {
+  constructor(config) {
     this.config = config;
     this.authRequests = [];
   }
@@ -8,32 +8,30 @@ class Store {
     const { clients } = this.config;
 
     return clients.find(c => c.id === id);
-  }
+  };
 
   getProviders = () => {
     const { providers } = this.config;
     return providers;
-  }
+  };
 
   getProvider = (id) => {
     const { providers } = this.config;
 
     return providers.find(p => p.id === id);
-  }
+  };
 
-  getAuthReq = (id) => {
-    return this.authRequests.find(a => a.id === id);
-  }
+  getAuthReq = id => this.authRequests.find(a => a.id === id);
 
-  createAuthReq = (authReq = { id, client, responseTypes, scopes, state, nonce, redirectURI, expiry, providerId }) => {
+  createAuthReq = (authReq) => {
     this.authRequests.push(authReq);
-  }
+  };
 
-  updateAuthReq = (authReq = { id, client, responseTypes, scopes, state, nonce, redirectURI, expiry, providerId }) => {
+  updateAuthReq = (authReq) => {
     const index = this.authRequests.findIndex(a => a.id === authReq.id);
 
     this.authRequests[index] = authReq;
-  }
+  };
 }
 
 export default Store;

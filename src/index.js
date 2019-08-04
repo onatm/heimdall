@@ -1,28 +1,29 @@
 import '@babel/polyfill';
 import http from 'http';
+
 // import { JWK, JWKS } from '@panva/jose';
 import App from './app';
 import Store from './store';
 import Handler from './handlers';
 
 const port = process.env.PORT || '5666';
-const issuer = "http://localhost:5666";
-const responseTypes = ["code", "id_token"];
+const issuer = 'http://localhost:5666';
+const responseTypes = ['code', 'id_token'];
 const clients = [
   {
     id: 'heimdall-sample-app',
-    redirectURI: "http://localhost:3000/callback"
+    redirectURI: 'http://localhost:3000/callback',
   }];
 const providers = [
   {
-    type: "github",
-    id: "github",
-    name: "GitHub",
+    type: 'github',
+    id: 'github',
+    name: 'GitHub',
     config: {
-      clientId: "",
-      clientSecret: ""
-    }
-  }
+      clientId: '',
+      clientSecret: '',
+    },
+  },
 ];
 
 responseTypes.sort();
@@ -60,24 +61,24 @@ const server = http.createServer(app);
 server.listen(port);
 
 server.on('listening', () => {
-  var addr = server.address();
+  // const addr = server.address();
   // log.info(`Listening on port ${addr.port}!`);
 });
 
-server.on('error', error => {
+server.on('error', (error) => {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+  // const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
 
   switch (error.code) {
     case 'EACCES':
-      log.error(bind + ' requires elevated privileges');
+      // log.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      log.error(bind + ' is already in use');
+      // log.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:

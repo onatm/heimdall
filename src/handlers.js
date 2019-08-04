@@ -1,12 +1,18 @@
-import crypto from 'crypto';
+/* eslint-disable babel/camelcase */
 import nanoid from 'nanoid';
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
+const parseAsArray = (str) => {
+  if (!str) {
+    return undefined;
+  }
+
+  return str.split(' ');
+};
+
 class Handler {
-  constructor(
-    config = { issuerURL },
-    store = { getClient, getProviders, getProvider, getAuthReq, createAuthReq, updateAuthReq }) {
+  constructor(config, store) {
     this.config = config;
     this.store = store;
   }
@@ -15,38 +21,38 @@ class Handler {
     const { issuer, responseTypes } = this.config;
 
     const discovery = {
-      issuer: issuer,
+      issuer,
       authorization_endpoint: `${issuer}/auth`,
       token_endpoint: `${issuer}/token`,
       jwks_uri: `${issuer}/jwks`,
       userinfo_endpoint: `${issuer}/userinfo`,
       response_types_supported: responseTypes,
-      subject_types_supported: ["public"],
-      id_token_signing_alg_values_supported: ["RS256"],
-      scopes_supported: ["openid", "email", "groups", "profile", "offline_access"],
-      token_endpoint_auth_methods_supported: ["client_secret_basic"],
-      claims_supported: ["aud", "email", "email_verified", "exp", "iat", "iss", "locale", "name", "sub"]
+      subject_types_supported: ['public'],
+      id_token_signing_alg_values_supported: ['RS256'],
+      scopes_supported: ['openid', 'email', 'groups', 'profile', 'offline_access'],
+      token_endpoint_auth_methods_supported: ['client_secret_basic'],
+      claims_supported: ['aud', 'email', 'email_verified', 'exp', 'iat', 'iss', 'locale', 'name', 'sub'],
     };
 
     res.json(discovery);
-  }
+  };
 
   authorizationHandler = async (req, res) => {
     const authReq = this.parseAuthorizationRequest(req.query);
 
     if (authReq.error) {
-      return res.render("error", { error: authReq.error })
+      return res.render('error', { error: authReq.error });
     }
 
-    authReq.expiry = "some time in the future";
+    authReq.expiry = 'some time in the future';
     this.store.createAuthReq(authReq);
 
     const providers = this.store.getProviders();
 
-    const providerInfos = providers.map(p => { return ({ id: p.id, name: p.name, url: `/auth/${p.id}?req=${authReq.id}` }) });
+    const providerInfos = providers.map(p => ({ id: p.id, name: p.name, url: `/auth/${p.id}?req=${authReq.id}` }));
 
-    res.render("authorization", { providerInfos });
-  }
+    return res.render('authorization', { providerInfos });
+  };
 
   providerHandler = async (req, res) => {
     const { issuer } = this.config;
@@ -69,11 +75,11 @@ class Handler {
       authorizationUri: 'https://github.com/login/oauth/authorize',
       redirectUri: `${issuer}/auth/${provider.id}/callback`,
       state: authReq.id,
-      scopes: authReq.scopes
+      scopes: authReq.scopes,
     });
 
     res.redirect(githubAuth.code.getUri());
-  }
+  };
 
   providerCallbackHandler = async (req, res) => {
     const { issuer } = this.config;
@@ -81,19 +87,19 @@ class Handler {
     const authReqId = req.query.state;
 
     if (!authReqId) {
-      return res.render("error", { error: "User session error." })
+      return res.render('error', { error: 'User session error.' });
     }
 
     const authReq = this.store.getAuthReq(authReqId);
 
     if (!authReq) {
-      return res.render("error", { error: "Invalid 'state' parameter provided: not found" })
+      return res.render('error', { error: "Invalid 'state' parameter provided: not found" });
     }
 
     const providerId = req.params.provider;
 
     if (providerId !== authReq.providerId) {
-      return res.render("error", { error: `Provider mismatch: authentication started with id ${authReq.providerId}, but callback for id ${providerId} was triggered` })
+      return res.render('error', { error: `Provider mismatch: authentication started with id ${authReq.providerId}, but callback for id ${providerId} was triggered` });
     }
 
     const provider = this.store.getProvider(providerId);
@@ -105,7 +111,7 @@ class Handler {
       authorizationUri: 'https://github.com/login/oauth/authorize',
       redirectUri: `${issuer}/auth/${provider.id}/callback`,
       state: authReq.id,
-      scopes: authReq.scopes
+      scopes: authReq.scopes,
     });
 
     const token = await githubAuth.code.getToken(req.originalUrl);
@@ -116,32 +122,32 @@ class Handler {
     //   token_type: user.tokenType
     // });
 
-    const githubApiUrl = "https://api.github.com/api/v3";
+    // const githubApiUrl = "https://api.github.com/api/v3";
 
     const userReq = token.sign({
       method: 'GET',
-      url: 'https://api.github.com/user'
+      url: 'https://api.github.com/user',
     });
 
     const user = await axios(userReq);
 
     return res.json(user.data);
-  }
+  };
 
   parseAuthorizationRequest = (q) => {
-    const state = q.state;
-    const nonce = q.nonce;
+    const { state } = q;
+    const { nonce } = q;
 
     const redirectURI = q.redirect_uri;
 
     if (!redirectURI) {
-      return { error: "No redirect_uri provided." };
+      return { error: 'No redirect_uri provided.' };
     }
 
     const clientId = q.client_id;
 
     if (!clientId) {
-      return { error: "No client_id provided." }
+      return { error: 'No client_id provided.' };
     }
 
     const client = this.store.getClient(clientId);
@@ -151,13 +157,13 @@ class Handler {
     }
 
     if (client.redirectURI !== redirectURI) {
-      return { error: `Unregistered redirect_uri (${redirectURI})` }
+      return { error: `Unregistered redirect_uri (${redirectURI})` };
     }
 
     const responseTypes = parseAsArray(q.response_type);
 
     if (!responseTypes) {
-      return { error: "No response_type provided." };
+      return { error: 'No response_type provided.' };
     }
 
     // TODO: check invalid and unsupported response types
@@ -165,7 +171,7 @@ class Handler {
     const scopes = parseAsArray(q.scope);
 
     if (!scopes) {
-      return { error: "No scope provided." };
+      return { error: 'No scope provided.' };
     }
 
     // TODO: check unrecognized scopes and missing open_id scope
@@ -174,16 +180,10 @@ class Handler {
 
     const id = nanoid();
 
-    return { id, client, responseTypes, scopes, state, nonce, redirectURI };
-  }
-}
-
-const parseAsArray = (str) => {
-  if (!str) {
-    return undefined;
-  }
-
-  return str.split(" ");
+    return {
+      id, client, responseTypes, scopes, state, nonce, redirectURI,
+    };
+  };
 }
 
 export default Handler;
