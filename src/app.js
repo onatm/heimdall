@@ -20,7 +20,7 @@ class App {
     router.get('/userinfo', (req, res) => res.send({ hello: "world!" }));
     router.get('/auth', handler.authorizationHandler);
     router.get('/auth/:provider', handler.providerHandler);
-    router.get('/auth/:provider/callback', (req, res) => res.send({ hello: "world!" }));
+    router.get('/auth/:provider/callback', handler.providerCallbackHandler);
     router.get('/approval', (req, res) => res.send({ hello: "world!" }));
     router.get('/healthz', (req, res) => res.send({ hello: "world!" }));
 

@@ -45,6 +45,8 @@ class Handler {
   }
 
   providerHandler = async (req, res) => {
+    const { issuer } = this.config;
+
     const providerId = req.params.provider;
 
     const provider = this.store.getProvider(providerId);
@@ -58,12 +60,16 @@ class Handler {
       clientSecret: provider.config.clientSecret,
       accessTokenUri: 'https://github.com/login/oauth/access_token',
       authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `http://localhost:5556/auth/${provider.id}/callback`,
+      redirectUri: `${issuer}/auth/${provider.id}/callback`,
       state: authReq.id,
       scopes: authReq.scopes
     });
 
     res.redirect(githubAuth.code.getUri());
+  }
+
+  providerCallbackHandler = async (req, res) => {
+    res.json({ code: req.query.code });
   }
 
   parseAuthorizationRequest = (q) => {
