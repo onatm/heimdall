@@ -1,7 +1,5 @@
 /* eslint-disable babel/camelcase */
 import nanoid from 'nanoid';
-import ClientOAuth2 from 'client-oauth2';
-import axios from 'axios';
 
 const parseAsArray = (str) => {
   if (!str) {
@@ -59,35 +57,25 @@ class Handler {
   };
 
   providerHandler = async (req, res) => {
-    const { issuer } = this.config;
-
     const providerId = req.params.provider;
-
-    const provider = this.store.getProvider(providerId);
 
     const authReqId = req.query.req;
 
+    const provider = this.store.getProvider(providerId);
+
+    // TODO: check if provider is null
+
     const authReq = this.store.getAuthReq(authReqId);
-    authReq.providerId = provider.id;
+    authReq.providerId = providerId;
 
     this.store.updateAuthReq(authReq);
 
-    const githubAuth = new ClientOAuth2({
-      clientId: provider.config.clientId,
-      clientSecret: provider.config.clientSecret,
-      accessTokenUri: 'https://github.com/login/oauth/access_token',
-      authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `${issuer}/auth/${provider.id}/callback`,
-      state: authReq.id,
-      scopes: authReq.scopes,
-    });
+    const callbackUrl = provider.getCallbackUrl(authReq.id, authReq.scopes);
 
-    res.redirect(githubAuth.code.getUri());
+    res.redirect(callbackUrl);
   };
 
   providerCallbackHandler = async (req, res) => {
-    const { issuer } = this.config;
-
     const authReqId = req.query.state;
 
     if (!authReqId) {
@@ -108,34 +96,9 @@ class Handler {
 
     const provider = this.store.getProvider(providerId);
 
-    const githubAuth = new ClientOAuth2({
-      clientId: provider.config.clientId,
-      clientSecret: provider.config.clientSecret,
-      accessTokenUri: 'https://github.com/login/oauth/access_token',
-      authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `${issuer}/auth/${provider.id}/callback`,
-      state: authReq.id,
-      scopes: authReq.scopes,
-    });
+    const identity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
-    const token = await githubAuth.code.getToken(req.originalUrl);
-
-    // res.json({
-    //   access_token: user.accessToken,
-    //   refresh_token: user.refreshToken,
-    //   token_type: user.tokenType
-    // });
-
-    // const githubApiUrl = "https://api.github.com/api/v3";
-
-    const userReq = token.sign({
-      method: 'GET',
-      url: 'https://api.github.com/user',
-    });
-
-    const user = await axios(userReq);
-
-    return res.json(user.data);
+    return res.json(identity);
   };
 
   parseAuthorizationRequest = (q) => {

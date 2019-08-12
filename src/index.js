@@ -6,6 +6,7 @@ import { JWKS } from '@panva/jose';
 import App from './app';
 import Store from './store';
 import Handler from './handlers';
+import GithubProvider from './providers/github';
 
 
 const port = process.env.PORT || '5666';
@@ -25,6 +26,12 @@ const providers = [
       clientId: '',
       clientSecret: '',
     },
+    internal: new GithubProvider({
+      clientId: '',
+      clientSecret: '',
+      id: 'github',
+      issuer,
+    }),
   },
 ];
 

@@ -18,13 +18,14 @@ class Store {
 
   getProviders = () => {
     const { providers } = this.opts;
+
     return providers;
   };
 
   getProvider = (id) => {
     const { providers } = this.opts;
 
-    return providers.find(p => p.id === id);
+    return providers.find(p => p.id === id).internal;
   };
 
   getAuthReq = id => this.authRequests.find(a => a.id === id);
