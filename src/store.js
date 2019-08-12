@@ -1,22 +1,28 @@
 class Store {
-  constructor(config) {
-    this.config = config;
+  constructor(opts) {
+    this.opts = opts;
     this.authRequests = [];
   }
 
+  getPublicKeystore = () => {
+    const { keystore } = this.opts;
+
+    return keystore.toJWKS(false);
+  };
+
   getClient = (id) => {
-    const { clients } = this.config;
+    const { clients } = this.opts;
 
     return clients.find(c => c.id === id);
   };
 
   getProviders = () => {
-    const { providers } = this.config;
+    const { providers } = this.opts;
     return providers;
   };
 
   getProvider = (id) => {
-    const { providers } = this.config;
+    const { providers } = this.opts;
 
     return providers.find(p => p.id === id);
   };

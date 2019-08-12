@@ -16,7 +16,7 @@ class App {
 
     router.get('/.well-known/openid-configuration', handler.discoveryHandler);
     router.get('/token', (req, res) => res.send({ hello: 'world!' }));
-    router.get('/jwks', (req, res) => res.send({ hello: 'world!' }));
+    router.get('/jwks', handler.keystoreHandler);
     router.get('/userinfo', (req, res) => res.send({ hello: 'world!' }));
     router.get('/auth', handler.authorizationHandler);
     router.get('/auth/:provider', handler.providerHandler);

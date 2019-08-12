@@ -37,6 +37,10 @@ class Handler {
     res.json(discovery);
   };
 
+  keystoreHandler = async (req, res) => {
+    res.json(this.store.getPublicKeystore());
+  };
+
   authorizationHandler = async (req, res) => {
     const authReq = this.parseAuthorizationRequest(req.query);
 
