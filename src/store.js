@@ -4,10 +4,16 @@ class Store {
     this.authRequests = [];
   }
 
-  getPublicKeystore = () => {
+  getPublicJWKS = () => {
     const { keystore } = this.opts;
 
     return keystore.toJWKS(false);
+  };
+
+  getKeystore = () => {
+    const { keystore } = this.opts;
+
+    return keystore;
   };
 
   getClient = (id) => {
@@ -38,6 +44,12 @@ class Store {
     const index = this.authRequests.findIndex(a => a.id === authReq.id);
 
     this.authRequests[index] = authReq;
+  };
+
+  deleteAuthReq = (id) => {
+    const index = this.authRequests.findIndex(a => a.id === id);
+
+    this.authRequests.splice(index);
   };
 }
 

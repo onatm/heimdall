@@ -4,4 +4,6 @@ const responseTypeIdToken = 'id_token';
 
 const supportedResponseTypes = [responseTypeCode, responseTypeToken, responseTypeIdToken];
 
-export default supportedResponseTypes;
+export {
+  supportedResponseTypes, responseTypeCode, responseTypeToken, responseTypeIdToken,
+};
