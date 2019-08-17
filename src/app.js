@@ -4,13 +4,13 @@ import reactViews from 'express-react-views';
 
 class App {
   constructor({ handler, port }) {
-    this.app = express();
-    this.app.set('port', port);
-    this.app.use(cors());
+    this._app = express();
+    this._app.set('port', port);
+    this._app.use(cors());
 
-    this.app.set('views', `${__dirname}/views`);
-    this.app.set('view engine', 'jsx');
-    this.app.engine('jsx', reactViews.createEngine());
+    this._app.set('views', `${__dirname}/views`);
+    this._app.set('view engine', 'jsx');
+    this._app.engine('jsx', reactViews.createEngine());
 
     const router = express.Router();
 
@@ -24,10 +24,12 @@ class App {
     router.get('/approval', (req, res) => res.send({ hello: 'world!' }));
     router.get('/healthz', (req, res) => res.send({ hello: 'world!' }));
 
-    this.app.use('/', router);
+    this._app.use('/', router);
   }
 
-  get = () => this.app;
+  get app() {
+    return this._app;
+  }
 }
 
 export default App;

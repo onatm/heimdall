@@ -19,10 +19,9 @@
       "error",
       {
         "allow": [
-          "_claim_names",
-          "_claim_sources",
-          "_matchedRouteName"
-        ]
+          "_matchedRouteName",
+        ],
+        "allowAfterThis": true
       }
     ],
     "import/order": [
