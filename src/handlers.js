@@ -97,7 +97,11 @@ class Handler {
     const providerId = req.params.provider;
 
     if (providerId !== authReq.providerId) {
-      return res.render('error', { error: `Provider mismatch: authentication started with id ${authReq.providerId}, but callback for id ${providerId} was triggered` });
+      return res.render('error', {
+        error:
+          `Provider mismatch: authentication started with id ${authReq.providerId},`
+          + ` but callback for id ${providerId} was triggered`,
+      });
     }
 
     const provider = this.store.getProvider(providerId);

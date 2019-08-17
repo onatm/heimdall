@@ -38,6 +38,12 @@
         "newlines-between": "always"
       }
     ],
+    "max-len": [
+      "error",
+      {
+        "code": 120
+      }
+    ],
     "babel/camelcase": 1,
     "babel/no-invalid-this": 1,
     "babel/semi": 1,
