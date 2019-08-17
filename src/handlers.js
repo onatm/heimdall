@@ -2,6 +2,7 @@
 import querystring from 'querystring';
 
 import { JWT } from '@panva/jose';
+import oidcTokenHash from 'oidc-token-hash';
 import nanoid from 'nanoid';
 
 import { responseTypeIdToken } from './consts';
@@ -101,17 +102,17 @@ class Handler {
 
     const provider = this.store.getProvider(providerId);
 
-    const identity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
+    const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
-    // store identity
+    // store new identity
 
     const claims = {
-      id: identity.id,
-      name: identity.name,
-      username: identity.username,
-      email: identity.email,
-      emailVerified: identity.emailVerified,
-      groups: identity.groups,
+      id: providerIdentity.id,
+      name: providerIdentity.name,
+      username: providerIdentity.username,
+      email: providerIdentity.email,
+      emailVerified: providerIdentity.emailVerified,
+      groups: providerIdentity.groups,
     };
 
     // no need for approval. heimdall authenticates users only using external providers
@@ -138,21 +139,39 @@ class Handler {
           const keystore = this.store.getKeystore();
           const key = keystore.get({ kty: 'RSA' });
 
-          const tok = {
+          // sub should be stored identity id
+          const sub = nanoid();
+
+          const accessTok = {
             iss: this.config.issuer,
-            sub: {
+            sub,
+            aud: '', // audience:server:client_id (scope)
+            azp: authReq.clientId,
+            scopes: authReq.scopes.join(' '),
+          };
+
+          accessToken = JWT.sign(accessTok, key, { expiresIn: '24 hours' });
+          const atHash = oidcTokenHash.generate(accessToken, key.alg);
+
+          const idTok = {
+            iss: this.config.issuer,
+            sub,
+            aud: authReq.clientId,
+            nonce: authReq.nonce,
+            at_hash: atHash,
+            email: claims.email,
+            email_verified: claims.emailVerified,
+            groups: claims.groups,
+            name: claims.name,
+            identities: [{
               user_id: claims.id,
               provider_id: providerId,
-            },
-            nonce: authReq.nonce,
-            at_hash: '', // access_token hash
-            aud: authReq.clientId,
+            }],
           };
 
           // add claims to token based on scopes
 
-          accessToken = '';
-          idToken = JWT.sign(tok, key, { expiresIn: '24 hours' });
+          idToken = JWT.sign(idTok, key, { expiresIn: '24 hours' });
           break;
         }
       }
