@@ -145,7 +145,7 @@ class Handler {
           const accessTok = {
             iss: this.config.issuer,
             sub,
-            aud: '', // audience:server:client_id (scope)
+            aud: authReq.audience,
             azp: authReq.clientId,
             scopes: authReq.scopes.join(' '),
           };
@@ -206,8 +206,7 @@ class Handler {
   };
 
   parseAuthorizationRequest = (q) => {
-    const { state } = q;
-    const { nonce } = q;
+    const { state, nonce, audience } = q;
 
     const redirectURI = q.redirect_uri;
 
@@ -231,6 +230,10 @@ class Handler {
       return { error: `Unregistered redirect_uri (${redirectURI})` };
     }
 
+    if (!audience) {
+      return { error: 'No audience provided.' };
+    }
+
     const responseTypes = parseAsArray(q.response_type);
 
     if (!responseTypes) {
@@ -252,7 +255,7 @@ class Handler {
     const id = nanoid();
 
     return {
-      id, clientId, responseTypes, scopes, state, nonce, redirectURI,
+      id, clientId, audience, responseTypes, scopes, state, nonce, redirectURI,
     };
   };
 }
