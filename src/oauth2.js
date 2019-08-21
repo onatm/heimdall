@@ -19,7 +19,7 @@ class Oauth2 {
     return JWT.sign(accessToken, this.key, { expiresIn: '24 hours' });
   };
 
-  newIdToken = (iss, sub, aud, nonce, accessToken, claims, providerId) => {
+  newIdToken = (iss, sub, aud, nonce, accessToken, claims) => {
     const atHash = oidcTokenHash.generate(accessToken, this.key.alg);
 
     const idToken = {
@@ -32,10 +32,7 @@ class Oauth2 {
       email_verified: claims.emailVerified,
       groups: claims.groups,
       name: claims.name,
-      identities: [{
-        user_id: claims.id,
-        provider_id: providerId,
-      }],
+      provider_claims: claims.providerClaims,
     };
 
     // add claims to token based on scopes

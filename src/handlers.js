@@ -144,6 +144,10 @@ class Handler {
       email: account.email,
       emailVerified: providerIdentity.emailVerified,
       groups: providerIdentity.groups,
+      providerClaims: {
+        provider_id: providerId,
+        user_id: providerIdentity.id,
+      },
     };
 
     // no need for approval. heimdall authenticates users only using external providers
@@ -175,7 +179,6 @@ class Handler {
       authReq.nonce,
       accessToken,
       claims,
-      providerId,
     );
 
     const values = {
