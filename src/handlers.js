@@ -1,11 +1,10 @@
 /* eslint-disable babel/camelcase */
 import querystring from 'querystring';
 
-import { JWT } from '@panva/jose';
-import oidcTokenHash from 'oidc-token-hash';
 import nanoid from 'nanoid';
 
 import { responseTypeIdToken } from './consts';
+import Oauth2 from './oauth2';
 
 const parseAsArray = (str) => {
   if (!str) {
@@ -171,39 +170,26 @@ class Handler {
           const keystore = this.store.getKeystore();
           const key = keystore.get({ kty: 'RSA' });
 
-          // sub should be stored identity id
-          const sub = nanoid();
+          const oauth2 = new Oauth2(key);
 
-          const accessTok = {
-            iss: this.config.issuer,
-            sub,
-            aud: authReq.audience,
-            azp: authReq.clientId,
-            scopes: authReq.scopes.join(' '),
-          };
+          accessToken = oauth2.newAccessToken(
+            this.config.issuer,
+            account.id,
+            authReq.audience,
+            authReq.clientId,
+            authReq.scopes,
+          );
 
-          accessToken = JWT.sign(accessTok, key, { expiresIn: '24 hours' });
-          const atHash = oidcTokenHash.generate(accessToken, key.alg);
+          idToken = oauth2.newIdToken(
+            this.config.issuer,
+            account.id,
+            authReq.clientId,
+            authReq.nonce,
+            accessToken,
+            claims,
+            providerId,
+          );
 
-          const idTok = {
-            iss: this.config.issuer,
-            sub,
-            aud: authReq.clientId,
-            nonce: authReq.nonce,
-            at_hash: atHash,
-            email: claims.email,
-            email_verified: claims.emailVerified,
-            groups: claims.groups,
-            name: claims.name,
-            identities: [{
-              user_id: claims.id,
-              provider_id: providerId,
-            }],
-          };
-
-          // add claims to token based on scopes
-
-          idToken = JWT.sign(idTok, key, { expiresIn: '24 hours' });
           break;
         }
       }
