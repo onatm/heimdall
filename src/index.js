@@ -8,10 +8,8 @@ import Store from './store';
 import Handler from './handlers';
 import GithubProvider from './providers/github';
 
-
 const port = process.env.PORT || '5666';
 const issuer = 'http://localhost:5666';
-const responseTypes = ['code', 'id_token'];
 const clients = [
   {
     id: 'heimdall-sample-app',
@@ -35,14 +33,12 @@ const providers = [
   },
 ];
 
-responseTypes.sort();
-
 const keystore = new JWKS.KeyStore();
 keystore.generateSync('RSA', 2048, { use: 'sig' });
 
 const store = new Store({ keystore, clients, providers });
-const handler = new Handler({ issuer, responseTypes }, store);
-const app = new App({ handler, port }).get();
+const handler = new Handler({ issuer }, store);
+const { app } = new App({ handler, port });
 
 const server = http.createServer(app);
 server.listen(port);

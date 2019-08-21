@@ -3,8 +3,8 @@ import querystring from 'querystring';
 
 import nanoid from 'nanoid';
 
-import { responseTypeIdToken } from './consts';
 import Oauth2 from './oauth2';
+import { supportedResponseTypes } from './consts';
 
 const parseAsArray = (str) => {
   if (!str) {
@@ -21,7 +21,7 @@ class Handler {
   }
 
   discoveryHandler = async (_, res) => {
-    const { issuer, responseTypes } = this.config;
+    const { issuer } = this.config;
 
     const discovery = {
       issuer,
@@ -29,7 +29,7 @@ class Handler {
       token_endpoint: `${issuer}/token`,
       jwks_uri: `${issuer}/jwks`,
       userinfo_endpoint: `${issuer}/userinfo`,
-      response_types_supported: responseTypes,
+      response_types_supported: supportedResponseTypes,
       subject_types_supported: ['public'],
       id_token_signing_alg_values_supported: ['RS256'],
       scopes_supported: ['openid', 'email', 'groups', 'profile', 'offline_access'],
@@ -153,74 +153,40 @@ class Handler {
 
     this.store.deleteAuthReq(authReq.id);
 
-    let implicitOrHybrid = false;
-    let accessToken = '';
-    let idToken = '';
+    const { redirectURI } = authReq;
 
-    let { redirectURI } = authReq;
-    const { responseTypes } = authReq;
+    const keystore = this.store.getKeystore();
+    const key = keystore.get({ kty: 'RSA' });
 
-    responseTypes.forEach((responseType) => {
-      switch (responseType) {
-        default:
-        case responseTypeIdToken:
-        {
-          implicitOrHybrid = true;
+    const oauth2 = new Oauth2(key);
 
-          const keystore = this.store.getKeystore();
-          const key = keystore.get({ kty: 'RSA' });
+    const accessToken = oauth2.newAccessToken(
+      this.config.issuer,
+      account.id,
+      authReq.audience,
+      authReq.clientId,
+      authReq.scopes,
+    );
 
-          const oauth2 = new Oauth2(key);
+    const idToken = oauth2.newIdToken(
+      this.config.issuer,
+      account.id,
+      authReq.clientId,
+      authReq.nonce,
+      accessToken,
+      claims,
+      providerId,
+    );
 
-          accessToken = oauth2.newAccessToken(
-            this.config.issuer,
-            account.id,
-            authReq.audience,
-            authReq.clientId,
-            authReq.scopes,
-          );
+    const values = {
+      token_type: 'bearer',
+      access_token: accessToken,
+      id_token: idToken,
+      state: authReq.state,
+      expires_in: null,
+    };
 
-          idToken = oauth2.newIdToken(
-            this.config.issuer,
-            account.id,
-            authReq.clientId,
-            authReq.nonce,
-            accessToken,
-            claims,
-            providerId,
-          );
-
-          break;
-        }
-      }
-    });
-
-    if (implicitOrHybrid) {
-      const values = {
-        token_type: 'bearer',
-        access_token: accessToken,
-        id_token: idToken,
-        state: authReq.state,
-        expires_in: null,
-      };
-
-      // if (idToken && !code.id)
-      if (idToken) {
-        // calculate expiration
-        values.expires_in = 24 * 60 * 60;
-      }
-
-      redirectURI = `${redirectURI}#${querystring.stringify(values)}`;
-    } else {
-      const query = {
-        code: 'id', // code.id
-        state: authReq.state,
-      };
-
-      redirectURI = `${redirectURI}?${querystring.stringify(query)}`;
-    }
-
-    return res.redirect(redirectURI);
+    return res.redirect(`${redirectURI}#${querystring.stringify(values)}`);
   };
 
   parseAuthorizationRequest = (q) => {
