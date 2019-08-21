@@ -2,6 +2,7 @@ class Store {
   constructor(opts) {
     this.opts = opts;
     this.authRequests = [];
+    this.accounts = [];
   }
 
   getPublicJWKS = () => {
@@ -36,9 +37,7 @@ class Store {
 
   getAuthReq = id => this.authRequests.find(a => a.id === id);
 
-  createAuthReq = (authReq) => {
-    this.authRequests.push(authReq);
-  };
+  createAuthReq = authReq => this.authRequests.push(authReq);
 
   updateAuthReq = (authReq) => {
     const index = this.authRequests.findIndex(a => a.id === authReq.id);
@@ -50,6 +49,16 @@ class Store {
     const index = this.authRequests.findIndex(a => a.id === id);
 
     this.authRequests.splice(index);
+  };
+
+  getAccountByEmail = email => this.accounts.find(a => a.email === email);
+
+  createAccount = account => this.accounts.push(account);
+
+  updateAccount = (account) => {
+    const index = this.accounts.findIndex(a => a.id === account.id);
+
+    this.accounts[index] = account;
   };
 }
 

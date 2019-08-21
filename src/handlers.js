@@ -108,13 +108,41 @@ class Handler {
 
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
-    // store new identity
+    let account = this.store.getAccountByEmail(providerIdentity.email);
+
+    if (account) {
+      if (account.identities.findIndex(i => i.provider === providerId) < 0) {
+        account.identities.push({
+          provider: providerId,
+          // scopes: authReq.scopes,
+          ...providerIdentity.data,
+        });
+
+        this.store.updateAccount(account);
+      }
+    } else {
+      account = {
+        id: nanoid(),
+        username: providerIdentity.username,
+        email: providerIdentity.email,
+        name: providerIdentity.name,
+        identities: [
+          {
+            provider: providerId,
+            // scopes: authReq.scopes,
+            ...providerIdentity.data,
+          },
+        ],
+      };
+
+      this.store.createAccount(account);
+    }
 
     const claims = {
-      id: providerIdentity.id,
-      name: providerIdentity.name,
-      username: providerIdentity.username,
-      email: providerIdentity.email,
+      id: account.id,
+      name: account.name,
+      username: account.username,
+      email: account.email,
       emailVerified: providerIdentity.emailVerified,
       groups: providerIdentity.groups,
     };
