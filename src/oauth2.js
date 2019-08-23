@@ -34,6 +34,7 @@ class Oauth2 {
       name: claims.name,
       email: claims.email,
       email_verified: claims.emailVerified,
+      updated_at: claims.updatedAt,
       groups: claims.groups,
       provider_claims: claims.providerClaims,
     };

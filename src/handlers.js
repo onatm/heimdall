@@ -2,6 +2,7 @@
 import querystring from 'querystring';
 
 import nanoid from 'nanoid';
+import { JWT } from '@panva/jose';
 
 import Oauth2 from './oauth2';
 import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from './consts';
@@ -42,6 +43,7 @@ class Handler {
           'picture',
           'email',
           'email_verified',
+          'updated_at',
           'at_hash',
           'groups',
           'provider_claims',
@@ -123,6 +125,8 @@ class Handler {
 
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
+    // if email is not verified, fail hard
+
     let account = this.store.getAccountByEmail(providerIdentity.email);
 
     if (account) {
@@ -133,9 +137,12 @@ class Handler {
           ...providerIdentity.data,
         });
 
+        account.updatedAt = Date.now();
+
         this.store.updateAccount(account);
       }
     } else {
+      const now = Date.now();
       account = {
         id: nanoid(),
         username: providerIdentity.username,
@@ -144,14 +151,19 @@ class Handler {
         identities: [
           {
             provider: providerId,
+            userId: providerIdentity.id,
             // scopes: authReq.scopes,
             ...providerIdentity.data,
           },
         ],
+        createdAt: now,
+        updatedAt: now,
       };
 
       this.store.createAccount(account);
     }
+
+    // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
 
     const claims = {
       id: account.id,
@@ -164,6 +176,7 @@ class Handler {
         provider_id: providerId,
         user_id: providerIdentity.id,
       },
+      updated_at: account.updatedAt,
     };
 
     // no need for approval. heimdall authenticates users only using external providers
@@ -226,7 +239,49 @@ class Handler {
     return res.redirect(`${redirectURI}#${querystring.stringify(values)}`);
   };
 
-  userInfoHandler = async (req, res) => res.send({ hello: 'world!' });
+  // https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
+  userInfoHandler = async (req, res) => {
+    const { authorization } = req.headers;
+
+    // header value's length should be greater than "Bearer " (7)
+    if (!authorization || authorization.length < 7) {
+      res.set({
+        'WWW-Authenticate':
+          [
+            'Bearer',
+            'error="invalid_token"',
+          ],
+      });
+      return res.status(401).send();
+    }
+
+    const accessTokenJwt = authorization.slice(7);
+
+    const keystore = this.store.getKeystore();
+    const key = keystore.get({ kty: 'RSA' });
+
+    const accessToken = JWT.verify(accessTokenJwt, key);
+
+    // get account by accessToken.sub
+    // create claims as above method
+    // return claims
+    const account = this.store.getAccountById(accessToken.sub);
+
+    // create it based on scopes
+    const userInfo = {
+      sub: account.id,
+      name: account.name,
+      username: account.username,
+      email: account.email,
+      email_verified: true,
+      groups: [],
+      identities: account.identities,
+    };
+
+    // https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationResponse
+    // we don't provide userinfo_signing_alg_values_supported so, continue with json response
+    return res.send(userInfo);
+  };
 
   parseAuthorizationRequest = (q) => {
     const { state, nonce, audience } = q;

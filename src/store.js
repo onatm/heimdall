@@ -51,6 +51,8 @@ class Store {
     this.authRequests.splice(index);
   };
 
+  getAccountById = id => this.accounts.find(a => a.id === id);
+
   getAccountByEmail = email => this.accounts.find(a => a.email === email);
 
   createAccount = account => this.accounts.push(account);
