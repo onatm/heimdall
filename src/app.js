@@ -15,14 +15,11 @@ class App {
     const router = express.Router();
 
     router.get('/.well-known/openid-configuration', handler.discoveryHandler);
-    router.get('/token', (req, res) => res.send({ hello: 'world!' }));
     router.get('/jwks', handler.keystoreHandler);
     router.get('/userinfo', (req, res) => res.send({ hello: 'world!' }));
     router.get('/auth', handler.authorizationHandler);
     router.get('/auth/:provider', handler.providerHandler);
     router.get('/auth/:provider/callback', handler.providerCallbackHandler);
-    router.get('/approval', (req, res) => res.send({ hello: 'world!' }));
-    router.get('/healthz', (req, res) => res.send({ hello: 'world!' }));
 
     this._app.use('/', router);
   }

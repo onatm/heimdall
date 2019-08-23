@@ -19,8 +19,11 @@ class Oauth2 {
     return JWT.sign(accessToken, this.key, { expiresIn: '24 hours' });
   };
 
-  newIdToken = (iss, sub, aud, nonce, accessToken, claims) => {
-    const atHash = oidcTokenHash.generate(accessToken, this.key.alg);
+  newIdToken = (iss, sub, aud, nonce, claims, accessToken) => {
+    let atHash;
+    if (accessToken) {
+      atHash = oidcTokenHash.generate(accessToken, this.key.alg);
+    }
 
     const idToken = {
       iss,
@@ -28,10 +31,10 @@ class Oauth2 {
       aud,
       nonce,
       at_hash: atHash,
+      name: claims.name,
       email: claims.email,
       email_verified: claims.emailVerified,
       groups: claims.groups,
-      name: claims.name,
       provider_claims: claims.providerClaims,
     };
 
