@@ -226,6 +226,8 @@ class Handler {
     return res.redirect(`${redirectURI}#${querystring.stringify(values)}`);
   };
 
+  userInfoHandler = async (req, res) => res.send({ hello: 'world!' });
+
   parseAuthorizationRequest = (q) => {
     const { state, nonce, audience } = q;
 
