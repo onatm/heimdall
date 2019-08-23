@@ -125,7 +125,7 @@ class Handler {
 
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
-    // if email is not verified, fail hard
+    // TODO: if email is not verified, fail hard
 
     let account = this.store.getAccountByEmail(providerIdentity.email);
 
@@ -163,7 +163,7 @@ class Handler {
       this.store.createAccount(account);
     }
 
-    // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+    // TODO: check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
 
     const claims = {
       name: account.name,
@@ -261,12 +261,9 @@ class Handler {
 
     const accessToken = JWT.verify(accessTokenJwt, key);
 
-    // get account by accessToken.sub
-    // create claims as above method
-    // return claims
     const account = this.store.getAccountById(accessToken.sub);
 
-    // create it based on scopes
+    // TODO: create it based on scopes
     const userInfo = {
       sub: account.id,
       name: account.name,

@@ -51,10 +51,10 @@ class GithubProvider {
     const user = await this.getUser(token);
 
     if (!user) {
-      // fail if missing
+      // TODO: fail if missing
     }
 
-    // get groups if scope provided
+    // TODO: get groups if scope provided
 
     const groups = [];
 
@@ -84,13 +84,13 @@ class GithubProvider {
       const githubUser = resp.data;
 
       if (!githubUser) {
-        // fail
+        // TODO: fail
       }
 
       const githubEmail = await this.getEmail(token);
 
       if (!githubEmail) {
-        // fail
+        // TODO: fail
       }
 
       const user = {
