@@ -1,3 +1,4 @@
+/* eslint-disable babel/camelcase */
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
@@ -62,10 +63,10 @@ class GithubProvider {
       name: user.name,
       username: user.username,
       email: user.email,
-      emailVerified: user.emailVerified,
+      email_verified: user.emailVerified,
       groups,
       data: {
-        accessToken: token.accessToken,
+        access_token: token.accessToken,
       },
     };
 
@@ -97,7 +98,7 @@ class GithubProvider {
         name: githubUser.name,
         username: githubUser.login,
         email: githubEmail.email,
-        emailVerified: githubEmail.verified,
+        email_verified: githubEmail.verified,
       };
 
       return user;

@@ -31,12 +31,7 @@ class Oauth2 {
       aud,
       nonce,
       at_hash: atHash,
-      name: claims.name,
-      email: claims.email,
-      email_verified: claims.emailVerified,
-      updated_at: claims.updatedAt,
-      groups: claims.groups,
-      provider_claims: claims.providerClaims,
+      ...claims,
     };
 
     // add claims to token based on scopes

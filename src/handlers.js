@@ -137,7 +137,7 @@ class Handler {
           ...providerIdentity.data,
         });
 
-        account.updatedAt = Date.now();
+        account.updated_at = Date.now();
 
         this.store.updateAccount(account);
       }
@@ -151,13 +151,13 @@ class Handler {
         identities: [
           {
             provider: providerId,
-            userId: providerIdentity.id,
+            user_id: providerIdentity.id,
             // scopes: authReq.scopes,
             ...providerIdentity.data,
           },
         ],
-        createdAt: now,
-        updatedAt: now,
+        created_at: now,
+        updated_at: now,
       };
 
       this.store.createAccount(account);
@@ -166,17 +166,16 @@ class Handler {
     // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
 
     const claims = {
-      id: account.id,
       name: account.name,
       username: account.username,
       email: account.email,
-      emailVerified: providerIdentity.emailVerified,
+      email_verified: true,
       groups: providerIdentity.groups,
-      providerClaims: {
-        provider_id: providerId,
+      provider_claims: {
+        id: providerId,
         user_id: providerIdentity.id,
       },
-      updated_at: account.updatedAt,
+      updated_at: account.updated_at,
     };
 
     // no need for approval. heimdall authenticates users only using external providers
