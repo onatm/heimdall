@@ -17,12 +17,16 @@ class App {
 
     const router = express.Router();
 
-    router.get('/.well-known/openid-configuration', handler.discoveryHandler);
-    router.get('/jwks', handler.keystoreHandler);
-    router.get('/userinfo', handler.userInfoHandler);
-    router.get('/auth', handler.authorizationHandler);
-    router.get('/auth/:provider', handler.providerHandler);
-    router.get('/auth/:provider/callback', handler.providerCallbackHandler);
+    const {
+      discoveryHandler, keystoreHandler, authorizationHandler, providerHandler, providerCallbackHandler, userInfoHandler,
+    } = handler;
+
+    router.get('/.well-known/openid-configuration', discoveryHandler.handle);
+    router.get('/jwks', keystoreHandler.handle);
+    router.get('/auth', authorizationHandler.handle);
+    router.get('/auth/:provider', providerHandler.handle);
+    router.get('/auth/:provider/callback', providerCallbackHandler.handle);
+    router.get('/userinfo', userInfoHandler.handle);
 
     this._app.use('/', router);
   }
