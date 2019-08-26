@@ -12,8 +12,8 @@ class App {
 
     this._app.use(express.static(path.join(__dirname, 'public')));
     this._app.set('views', path.join(__dirname, 'views'));
-    this._app.set('view engine', 'jsx');
-    this._app.engine('jsx', reactViews.createEngine());
+    this._app.set('view engine', 'js');
+    this._app.engine('js', reactViews.createEngine());
 
     const router = express.Router();
 
