@@ -2,11 +2,28 @@
   "parser": "babel-eslint",
   "extends": "airbnb-base",
   "plugins": [
-    "babel"
+    "babel",
+    "react"
   ],
   "env": {
     "es6": true,
     "node": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    }
   },
   "rules": {
     "no-empty": [
@@ -41,13 +58,24 @@
     "max-len": [
       "error",
       {
-        "code": 120
+        "code": 130
       }
     ],
     "babel/camelcase": 1,
     "babel/no-invalid-this": 1,
     "babel/semi": 1,
     "babel/no-unused-expressions": 1,
-    "babel/valid-typeof": 1
+    "babel/valid-typeof": 1,
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error",
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    ]
   }
 }

@@ -1,3 +1,5 @@
+import path from 'path';
+
 import express from 'express';
 import cors from 'cors';
 import reactViews from 'express-react-views';
@@ -8,7 +10,8 @@ class App {
     this._app.set('port', port);
     this._app.use(cors());
 
-    this._app.set('views', `${__dirname}/views`);
+    this._app.use(express.static(path.join(__dirname, 'public')));
+    this._app.set('views', path.join(__dirname, 'views'));
     this._app.set('view engine', 'jsx');
     this._app.engine('jsx', reactViews.createEngine());
 

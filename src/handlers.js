@@ -74,7 +74,12 @@ class Handler {
 
     const providers = this.store.getProviders();
 
-    const providerInfos = providers.map(p => ({ id: p.id, name: p.name, url: `/auth/${p.id}?req=${authReq.id}` }));
+    const providerInfos = providers.map(p => ({
+      id: p.id,
+      type: p.type,
+      name: p.name,
+      url: `/auth/${p.id}?req=${authReq.id}`,
+    }));
 
     return res.render('authorization', { providerInfos });
   };
