@@ -1,8 +1,10 @@
 import nanoid from 'nanoid';
 
+import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../consts';
+
 const parseAsArray = (str) => {
   if (!str) {
-    return undefined;
+    return [];
   }
 
   return str.split(' ');
@@ -17,9 +19,16 @@ class AuthorizationHandler {
     const authReq = this.parseAuthorizationRequest(req.query);
 
     if (authReq.error) {
-      return res.render('error', { error: authReq.error });
+      const { error: { type, message, redirectURI } } = authReq;
+      if (type === 'redirect') {
+        return res.redirect(303, redirectURI);
+      }
+
+      res.status(400);
+      return res.render('error', { error: message });
     }
 
+    // TODO: store a proper expiry time
     authReq.expiry = 'some time in the future';
     this.store.createAuthReq(authReq);
 
@@ -36,51 +45,115 @@ class AuthorizationHandler {
   };
 
   parseAuthorizationRequest = (q) => {
-    const { state, nonce, audience } = q;
-
-    const redirectURI = q.redirect_uri;
-
-    if (!redirectURI) {
-      return { error: 'No redirect_uri provided.' };
-    }
-
-    const clientId = q.client_id;
-
-    if (!clientId) {
-      return { error: 'No client_id provided.' };
-    }
+    const {
+      client_id: clientId, redirect_uri: redirectURI, state, nonce,
+    } = q;
 
     const client = this.store.getClient(clientId);
 
     if (!client) {
-      return { error: `Invalid client_id (${clientId})` };
+      return {
+        error: {
+          type: 'render',
+          message: `Invalid client_id (${clientId})`,
+        },
+      };
     }
 
     if (client.redirectURI !== redirectURI) {
-      return { error: `Unregistered redirect_uri (${redirectURI})` };
+      return {
+        error: {
+          type: 'render',
+          message: `Unregistered redirect_uri (${redirectURI})`,
+        },
+      };
     }
 
-    if (!audience) {
-      return { error: 'No audience provided.' };
+    const redirectError = (error, description) => ({
+      error: {
+        type: 'redirect',
+        redirectURI: `${redirectURI}&error=${error}&error_description=${description}&state=${state}`,
+      },
+    });
+
+    const scopes = parseAsArray(q.scope);
+
+    let hasOpenIdScope = false;
+    const audience = [];
+    const invalidScopes = [];
+    const unrecognizedScopes = [];
+
+    // TODO: validate custom scopes
+
+    for (let i = 0; i < scopes.length; i++) {
+      switch (scopes[i]) {
+        case 'openid':
+          hasOpenIdScope = true;
+          break;
+        case 'profile':
+        case 'email':
+        case 'groups':
+          break;
+        default:
+          if (scopes[i].startsWith('audience:')) {
+            const audienceScope = scopes[i].slice(9);
+            if (client.audience.includes(audienceScope)) {
+              audience.push(audienceScope);
+            } else {
+              invalidScopes.push(scopes[i]);
+            }
+          } else {
+            unrecognizedScopes.push(scopes[i]);
+          }
+          break;
+      }
+    }
+
+    if (!hasOpenIdScope) {
+      return redirectError('invalid_scope', 'Missing required scope(s) [\'openid\']');
+    }
+
+    if (unrecognizedScopes.length > 0) {
+      return redirectError('invalid_scope', `Unrecognized scope(s) ${unrecognizedScopes.join(', ')}`);
+    }
+
+    if (invalidScopes.length > 0) {
+      return redirectError('invalid_scope', `Client cannot request scope(s) ${invalidScopes.join(', ')}`);
     }
 
     const responseTypes = parseAsArray(q.response_type);
 
-    if (!responseTypes) {
-      return { error: 'No response_type provided.' };
+    if (responseTypes.length === 0) {
+      return redirectError('invalid_request', 'No response_type provided');
     }
 
-    // TODO: check invalid and unsupported response types
+    let idTokenEnabled = false;
+    let tokenEnabled = false;
 
-    const scopes = parseAsArray(q.scope);
+    for (let i = 0; i < responseTypes.length; i++) {
+      switch (responseTypes[i]) {
+        case responseTypeIdToken:
+          idTokenEnabled = true;
+          break;
+        case responseTypeToken:
+          tokenEnabled = true;
+          break;
+        default:
+          return redirectError('invalid_request', `Invalid response type ${responseTypes[i]}`);
+      }
 
-    if (!scopes) {
-      return { error: 'No scope provided.' };
+      if (!supportedResponseTypes.includes(responseTypes[i])) {
+        return redirectError('unsupported_response_type', `Unsupported response type ${responseTypes[i]}`);
+      }
     }
 
-    // TODO: check unrecognized scopes and missing open_id scope
+    if (tokenEnabled && !idTokenEnabled) {
+      return redirectError('invalid_request', 'Response type \'token\' must be provided with type \'id_token\'');
+    }
 
-    // TODO: check nonce for implicit flow
+    if (tokenEnabled && !nonce) {
+      return redirectError('invalid_request', 'Response type \'token\' requires a \'nonce\' value');
+    }
 
     const id = nanoid();
 

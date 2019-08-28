@@ -59,6 +59,12 @@
       "error",
       {
         "code": 130
+      },
+    ],
+    "no-plusplus": [
+      "error",
+      {
+        "allowForLoopAfterthoughts": true
       }
     ],
     "babel/camelcase": 1,
