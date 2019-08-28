@@ -7,7 +7,7 @@ const parseAsArray = (str) => {
     return [];
   }
 
-  return str.split(' ');
+  return str.trim().split(' ').filter(s => !!s);
 };
 
 class AuthorizationHandler {
