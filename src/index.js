@@ -15,6 +15,7 @@ const clients = [
     id: 'heimdall-sample-app',
     redirectURI: 'http://localhost:3000/callback',
     audience: ['heimdall-sample-api'],
+    scopes: ['read:messages'],
   }];
 const providers = [
   {

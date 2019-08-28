@@ -83,8 +83,6 @@ class AuthorizationHandler {
     const invalidScopes = [];
     const unrecognizedScopes = [];
 
-    // TODO: validate custom scopes
-
     for (let i = 0; i < scopes.length; i++) {
       switch (scopes[i]) {
         case 'openid':
@@ -102,7 +100,7 @@ class AuthorizationHandler {
             } else {
               invalidScopes.push(scopes[i]);
             }
-          } else {
+          } else if (!client.scopes || !client.scopes.includes(scopes[i])) {
             unrecognizedScopes.push(scopes[i]);
           }
           break;
