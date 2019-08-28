@@ -28,8 +28,7 @@ class AuthorizationHandler {
       return res.render('error', { error: message });
     }
 
-    // TODO: store a proper expiry time
-    authReq.expiry = 'some time in the future';
+    authReq.expiry = new Date(Date.now() + 1000 * 60 * 5).toISOString();
     this.store.createAuthReq(authReq);
 
     const providers = this.store.getProviders();
