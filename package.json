@@ -1,7 +1,7 @@
 {
   "name": "heimdall",
   "version": "0.1.0",
-  "description": "OpenID Connect Identity (OIDC) and OAuth 2.0 Provider with opinionated identity management",
+  "description": "Implicit OpenID Connect (OIDC) and OAuth 2.0 Provider with opinionated identity management",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
