@@ -77,14 +77,33 @@ class ProviderCallbackHandler {
       this.store.createAccount(account);
     }
 
-    // TODO: check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+    // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+    let claims = {};
 
-    const claims = {
-      name: account.name,
-      username: account.username,
-      email: account.email,
-      email_verified: true,
-      groups: providerIdentity.groups,
+    if (authReq.scopes.includes('profile')) {
+      claims = {
+        name: account.name,
+        username: account.username,
+      };
+    }
+
+    if (authReq.scopes.includes('email')) {
+      claims = {
+        ...claims,
+        email: account.email,
+        email_verified: true,
+      };
+    }
+
+    if (authReq.scopes.includes('groups')) {
+      claims = {
+        ...claims,
+        groups: providerIdentity.groups,
+      };
+    }
+
+    claims = {
+      ...claims,
       provider_claims: {
         id: providerId,
         user_id: providerIdentity.id,

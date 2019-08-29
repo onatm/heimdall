@@ -34,8 +34,6 @@ class Oauth2 {
       ...claims,
     };
 
-    // TODO: add claims to token based on scopes
-
     return JWT.sign(idToken, this.key, { expiresIn: '24 hours' });
   };
 }
