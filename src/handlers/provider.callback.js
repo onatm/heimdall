@@ -47,7 +47,6 @@ class ProviderCallbackHandler {
       if (account.identities.findIndex(i => i.provider === providerId) < 0) {
         account.identities.push({
           provider: providerId,
-          // scopes: authReq.scopes,
           ...providerIdentity.data,
         });
 
@@ -66,7 +65,6 @@ class ProviderCallbackHandler {
           {
             provider: providerId,
             user_id: providerIdentity.id,
-            // scopes: authReq.scopes,
             ...providerIdentity.data,
           },
         ],
