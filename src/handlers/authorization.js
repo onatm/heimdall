@@ -1,14 +1,7 @@
 import nanoid from 'nanoid';
 
 import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../consts';
-
-const parseAsArray = (str) => {
-  if (!str) {
-    return [];
-  }
-
-  return str.trim().split(' ').filter(s => !!s);
-};
+import { parseAsArray } from '../utils';
 
 class AuthorizationHandler {
   constructor(store) {

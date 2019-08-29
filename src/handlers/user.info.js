@@ -1,12 +1,15 @@
 /* eslint-disable babel/camelcase */
 import { JWT } from '@panva/jose';
 
+import { parseAsArray } from '../utils';
+
 class UserInfo {
   constructor(store) {
     this.store = store;
   }
 
   // https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
+  // groups are not included to user info
   handle = async (req, res) => {
     const { authorization } = req.headers;
 
@@ -31,14 +34,29 @@ class UserInfo {
 
     const account = this.store.getAccountById(accessToken.sub);
 
-    // TODO: create it based on scopes
-    const userInfo = {
+    const scopes = parseAsArray(accessToken.scopes);
+
+    let userInfo = {
       sub: account.id,
-      name: account.name,
-      username: account.username,
-      email: account.email,
-      email_verified: true,
-      groups: [],
+    };
+
+    if (scopes.includes('profile')) {
+      userInfo = {
+        name: account.name,
+        username: account.username,
+      };
+    }
+
+    if (scopes.includes('email')) {
+      userInfo = {
+        ...userInfo,
+        email: account.email,
+        email_verified: true,
+      };
+    }
+
+    userInfo = {
+      ...userInfo,
       identities: account.identities,
     };
 
