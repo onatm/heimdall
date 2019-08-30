@@ -3,7 +3,7 @@ import querystring from 'querystring';
 
 import nanoid from 'nanoid';
 
-import { responseTypeToken, responseTypeIdToken } from '../consts';
+import { responseTypeToken } from '../consts';
 import Oauth2 from '../oauth2';
 
 class ProviderCallbackHandler {
@@ -124,7 +124,6 @@ class ProviderCallbackHandler {
     const oauth2 = new Oauth2(key);
 
     let accessToken;
-    let idToken;
 
     if (responseTypes.includes(responseTypeToken)) {
       accessToken = oauth2.newAccessToken(
@@ -136,18 +135,17 @@ class ProviderCallbackHandler {
       );
     }
 
-    if (responseTypes.includes(responseTypeIdToken)) {
-      idToken = oauth2.newIdToken(
-        this.config.issuer,
-        account.id,
-        authReq.clientId,
-        authReq.nonce,
-        claims,
-        accessToken,
-      );
-    }
+    const idToken = oauth2.newIdToken(
+      this.config.issuer,
+      account.id,
+      authReq.clientId,
+      authReq.nonce,
+      claims,
+      accessToken,
+    );
 
     let values = {
+      id_token: idToken,
       state: authReq.state,
     };
 
@@ -155,13 +153,6 @@ class ProviderCallbackHandler {
       values = {
         token_type: 'bearer',
         access_token: accessToken,
-        ...values,
-      };
-    }
-
-    if (idToken) {
-      values = {
-        id_token: idToken,
         ...values,
       };
     }
