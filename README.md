@@ -10,7 +10,7 @@ There are some missing functionality that should be implemented before *v1.0*.
 
 - [x] Split handlers into multiple classes (or files)
 - [x] Decision about custom `scopes` and `claims`
-- [ ] Implement todos written in comments
+- [x] Implement todos written in comments
 - [ ] Extract account management code
 - [ ] Use `mongodb` as the datastore
 - [ ] Decision about configurable parameters

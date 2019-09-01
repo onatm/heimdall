@@ -2,7 +2,9 @@
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
-const githubEmailScope = 'user:email';
+const apiUrl = 'https://api.github.com';
+const emailScope = 'user:email';
+const orgsScope = 'read:org';
 
 class GithubProvider {
   constructor(config) {
@@ -14,8 +16,6 @@ class GithubProvider {
       clientId, clientSecret, id, issuer,
     } = this.config;
 
-    const githubScopes = scopes.includes('email') ? githubEmailScope : '';
-
     const githubAuth = new ClientOAuth2({
       clientId,
       clientSecret,
@@ -23,7 +23,7 @@ class GithubProvider {
       authorizationUri: 'https://github.com/login/oauth/authorize',
       redirectUri: `${issuer}/auth/${id}/callback`,
       state: authReqId,
-      scopes: githubScopes,
+      scopes: this.getScopes(scopes),
     });
 
     return githubAuth.code.getUri();
@@ -34,8 +34,6 @@ class GithubProvider {
       clientId, clientSecret, id, issuer,
     } = this.config;
 
-    const githubScopes = scopes.includes('email') ? githubEmailScope : '';
-
     const githubAuth = new ClientOAuth2({
       clientId,
       clientSecret,
@@ -43,7 +41,7 @@ class GithubProvider {
       authorizationUri: 'https://github.com/login/oauth/authorize',
       redirectUri: `${issuer}/auth/${id}/callback`,
       state: authReqId,
-      scopes: githubScopes,
+      scopes: this.getScopes(scopes),
     });
 
     const token = await githubAuth.code.getToken(originalUrl);
@@ -64,13 +62,44 @@ class GithubProvider {
       return { error: 'github: user has no verified, primary email' };
     }
 
-    // TODO: check scope
-    const groups = [];
-
-    const identity = {
+    let identity = {
       ...githubUser,
       email: githubEmail.email,
-      groups,
+    };
+
+    if (scopes.includes('groups')) {
+      const orgs = await this.getOrgs(token);
+
+      if (!orgs) {
+        return { error: 'github: failed to get orgs' };
+      }
+
+      const orgTeams = await this.getOrgTeams(token);
+
+      if (!orgTeams) {
+        return { error: 'github: failed to get teams' };
+      }
+
+      const groups = [];
+
+      orgs.forEach((o) => {
+        groups.push(o);
+        const teams = orgTeams[o];
+        if (teams) {
+          teams.forEach((t) => {
+            groups.push(`${o}:${t}`);
+          });
+        }
+      });
+
+      identity = {
+        ...identity,
+        groups,
+      };
+    }
+
+    identity = {
+      ...identity,
       data: {
         access_token: token.accessToken,
       },
@@ -83,7 +112,7 @@ class GithubProvider {
     try {
       const userReq = token.sign({
         method: 'GET',
-        url: 'https://api.github.com/user',
+        url: `${apiUrl}/user`,
       });
       const resp = await axios(userReq);
 
@@ -109,7 +138,7 @@ class GithubProvider {
     try {
       const emailsReq = token.sign({
         method: 'GET',
-        url: 'https://api.github.com/user/emails',
+        url: `${apiUrl}/user/emails`,
       });
       const resp = await axios(emailsReq);
 
@@ -119,6 +148,56 @@ class GithubProvider {
     } catch {
       return undefined;
     }
+  };
+
+  getOrgs = async (token) => {
+    try {
+      const orgsRequest = token.sign({
+        method: 'GET',
+        url: `${apiUrl}/user/orgs`,
+      });
+      const resp = await axios(orgsRequest);
+
+      const orgs = resp.data;
+
+      return orgs.map(o => o.login);
+    } catch (err) {
+      return undefined;
+    }
+  };
+
+  getOrgTeams = async (token) => {
+    try {
+      const orgTeamsRequest = token.sign({
+        method: 'GET',
+        url: `${apiUrl}/user/teams`,
+      });
+      const resp = await axios(orgTeamsRequest);
+
+      const orgTeams = {};
+
+      resp.data.forEach((ot) => {
+        orgTeams[`${ot.organization.login}`] = [...orgTeams[`${ot.organization.login}`], ot.slug];
+      });
+
+      return orgTeams;
+    } catch {
+      return undefined;
+    }
+  };
+
+  getScopes = (scopes) => {
+    const githubScopes = [];
+
+    if (scopes.includes('email')) {
+      githubScopes.push(emailScope);
+    }
+
+    if (scopes.includes('groups')) {
+      githubScopes.push(orgsScope);
+    }
+
+    return githubScopes.join(' ');
   };
 }
 
