@@ -13,7 +13,11 @@ class ProviderCallbackHandler {
   }
 
   handle = async (req, res) => {
-    const authReqId = req.query.state;
+    const { error, error_description: errorDescription, state: authReqId } = req.query;
+
+    if (error) {
+      return res.render('error', { error: `${error}: ${errorDescription}` });
+    }
 
     if (!authReqId) {
       return res.render('error', { error: 'User session error.' });
@@ -39,7 +43,9 @@ class ProviderCallbackHandler {
 
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
-    // TODO: if email is not verified, fail hard
+    if (providerIdentity.error) {
+      return res.render('error', { error: providerIdentity.error });
+    }
 
     let account = this.store.getAccountByEmail(providerIdentity.email);
 

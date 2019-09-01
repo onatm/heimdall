@@ -2,7 +2,7 @@
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
-const scopeEmail = 'user:email';
+const githubEmailScope = 'user:email';
 
 class GithubProvider {
   constructor(config) {
@@ -14,7 +14,7 @@ class GithubProvider {
       clientId, clientSecret, id, issuer,
     } = this.config;
 
-    const githubScopes = `${scopes} ${scopeEmail}`;
+    const githubScopes = scopes.includes('email') ? githubEmailScope : '';
 
     const githubAuth = new ClientOAuth2({
       clientId,
@@ -34,7 +34,7 @@ class GithubProvider {
       clientId, clientSecret, id, issuer,
     } = this.config;
 
-    const githubScopes = `${scopes} ${scopeEmail}`;
+    const githubScopes = scopes.includes('email') ? githubEmailScope : '';
 
     const githubAuth = new ClientOAuth2({
       clientId,
@@ -48,22 +48,28 @@ class GithubProvider {
 
     const token = await githubAuth.code.getToken(originalUrl);
 
-    const user = await this.getUser(token);
-
-    if (!user) {
-      // TODO: fail if missing
+    if (!token) {
+      return { error: 'github: failed to get a token' };
     }
 
-    // TODO: get groups if scope provided
+    const githubUser = await this.getUser(token);
 
+    if (!githubUser) {
+      return { error: 'github: failed to get user' };
+    }
+
+    const githubEmail = await this.getEmail(token);
+
+    if (!githubEmail) {
+      return { error: 'github: user has no verified, primary email' };
+    }
+
+    // TODO: check scope
     const groups = [];
 
     const identity = {
-      id: user.id,
-      name: user.name,
-      username: user.username,
-      email: user.email,
-      email_verified: user.emailVerified,
+      ...githubUser,
+      email: githubEmail.email,
       groups,
       data: {
         access_token: token.accessToken,
@@ -84,21 +90,13 @@ class GithubProvider {
       const githubUser = resp.data;
 
       if (!githubUser) {
-        // TODO: fail
-      }
-
-      const githubEmail = await this.getEmail(token);
-
-      if (!githubEmail) {
-        // TODO: fail
+        return undefined;
       }
 
       const user = {
         id: githubUser.id,
         name: githubUser.name,
         username: githubUser.login,
-        email: githubEmail.email,
-        email_verified: githubEmail.verified,
       };
 
       return user;
@@ -117,7 +115,7 @@ class GithubProvider {
 
       const emails = resp.data;
 
-      return emails.find(e => e.primary);
+      return emails.find(e => e.primary && e.verified);
     } catch {
       return undefined;
     }
