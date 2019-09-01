@@ -16,22 +16,26 @@ class ProviderCallbackHandler {
     const { error, error_description: errorDescription, state: authReqId } = req.query;
 
     if (error) {
+      res.status(500);
       return res.render('error', { error: `${error}: ${errorDescription}` });
     }
 
     if (!authReqId) {
+      res.status(400);
       return res.render('error', { error: 'User session error.' });
     }
 
     const authReq = this.store.getAuthReq(authReqId);
 
     if (!authReq) {
+      res.status(500);
       return res.render('error', { error: "Invalid 'state' parameter provided: not found" });
     }
 
     const providerId = req.params.provider;
 
     if (providerId !== authReq.providerId) {
+      res.status(500);
       return res.render('error', {
         error:
           `Provider mismatch: authentication started with id ${authReq.providerId},`
@@ -44,6 +48,7 @@ class ProviderCallbackHandler {
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
 
     if (providerIdentity.error) {
+      res.status(500);
       return res.render('error', { error: providerIdentity.error });
     }
 
