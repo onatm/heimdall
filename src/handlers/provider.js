@@ -10,7 +10,10 @@ class ProviderHandler {
 
     const provider = this.store.getProvider(providerId);
 
-    // TODO: check if provider is null
+    if (!provider) {
+      res.status(500);
+      return res.render('error', { error: 'Requested provider does not exist' });
+    }
 
     const authReq = this.store.getAuthReq(authReqId);
     authReq.providerId = providerId;
@@ -19,7 +22,7 @@ class ProviderHandler {
 
     const callbackUrl = provider.getCallbackUrl(authReq.id, authReq.scopes);
 
-    res.redirect(callbackUrl);
+    return res.redirect(callbackUrl);
   };
 }
 
