@@ -1,15 +1,15 @@
 /* eslint-disable babel/camelcase */
 import querystring from 'querystring';
 
-import nanoid from 'nanoid';
-
 import { responseTypeToken } from '../consts';
 import Oauth2 from '../oauth2';
+import AccountManager from '../account/manager';
 
 class ProviderCallbackHandler {
   constructor(config, store) {
     this.config = config;
     this.store = store;
+    this.accountManager = new AccountManager(store);
   }
 
   handle = async (req, res) => {
@@ -52,39 +52,7 @@ class ProviderCallbackHandler {
       return res.render('error', { error: providerIdentity.error });
     }
 
-    let account = this.store.getAccountByEmail(providerIdentity.email);
-
-    if (account) {
-      if (account.identities.findIndex(i => i.provider === providerId) < 0) {
-        account.identities.push({
-          provider: providerId,
-          ...providerIdentity.data,
-        });
-
-        account.updated_at = Date.now();
-
-        this.store.updateAccount(account);
-      }
-    } else {
-      const now = Date.now();
-      account = {
-        id: nanoid(),
-        username: providerIdentity.username,
-        email: providerIdentity.email,
-        name: providerIdentity.name,
-        identities: [
-          {
-            provider: providerId,
-            user_id: providerIdentity.id,
-            ...providerIdentity.data,
-          },
-        ],
-        created_at: now,
-        updated_at: now,
-      };
-
-      this.store.createAccount(account);
-    }
+    const account = this.accountManager.findAccount(providerIdentity, providerId);
 
     // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
     let claims = {};
