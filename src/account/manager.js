@@ -1,51 +1,19 @@
-/* eslint-disable babel/camelcase */
-import nanoid from 'nanoid';
-
 class AccountManager {
   constructor(store) {
     this.store = store;
   }
 
-  findAccount = (providerIdentity, providerId) => {
-    const now = Date.now();
-    const account = this.store.getAccountByEmail(providerIdentity.email);
+  findAccount = async (identity, providerId) => {
+    const account = await this.store.getAccountByEmail(identity.email);
 
     if (!account) {
-      return this.createAccount(providerIdentity, providerId, now);
+      return this.createAccount(identity, providerId);
     }
 
-    account.identities[providerId] = {
-      user_id: providerIdentity.id,
-      ...providerIdentity.data,
-    };
-
-    account.updated_at = now;
-
-    this.store.updateAccount(account);
-
-    return account;
+    return this.store.updateAccount(account, identity, providerId);
   };
 
-  createAccount = (providerIdentity, providerId, now) => {
-    const account = {
-      id: nanoid(),
-      username: providerIdentity.username,
-      email: providerIdentity.email,
-      name: providerIdentity.name,
-      identities: {},
-      created_at: now,
-      updated_at: now,
-    };
-
-    account.identities[providerId] = {
-      user_id: providerIdentity.id,
-      ...providerIdentity.data,
-    };
-
-    this.store.createAccount(account);
-
-    return account;
-  };
+  createAccount = async (identity, providerId) => this.store.createAccount(identity, providerId);
 }
 
 export default AccountManager;

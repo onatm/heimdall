@@ -15,12 +15,9 @@ class ProviderHandler {
       return res.render('error', { error: 'Requested provider does not exist' });
     }
 
-    const authReq = this.store.getAuthReq(authReqId);
-    authReq.providerId = providerId;
+    const { id, scopes } = await this.store.updateAuthReq(authReqId, providerId);
 
-    this.store.updateAuthReq(authReq);
-
-    const callbackUrl = provider.getCallbackUrl(authReq.id, authReq.scopes);
+    const callbackUrl = provider.getCallbackUrl(id, scopes);
 
     return res.redirect(callbackUrl);
   };

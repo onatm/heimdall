@@ -1,5 +1,3 @@
-import nanoid from 'nanoid';
-
 import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../consts';
 import { parseAsArray } from '../utils';
 
@@ -21,8 +19,7 @@ class AuthorizationHandler {
       return res.render('error', { error: message });
     }
 
-    authReq.expiry = new Date(Date.now() + 1000 * 60 * 5).toISOString();
-    this.store.createAuthReq(authReq);
+    const { id: authReqId } = await this.store.createAuthReq(authReq);
 
     const providers = this.store.getProviders();
 
@@ -30,7 +27,7 @@ class AuthorizationHandler {
       id: p.id,
       type: p.type,
       name: p.name,
-      url: `/auth/${p.id}?req=${authReq.id}`,
+      url: `/auth/${p.id}?req=${authReqId}`,
     }));
 
     return res.render('authorization', { providerInfos });
@@ -145,10 +142,10 @@ class AuthorizationHandler {
       return redirectError('invalid_request', 'Response type \'token\' requires a \'nonce\' value');
     }
 
-    const id = nanoid();
+    const expiry = new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
     return {
-      id, clientId, audience, responseTypes, scopes, state, nonce, redirectURI,
+      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, expiry,
     };
   };
 }

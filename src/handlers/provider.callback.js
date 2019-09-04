@@ -25,7 +25,7 @@ class ProviderCallbackHandler {
       return res.render('error', { error: 'User session error.' });
     }
 
-    const authReq = this.store.getAuthReq(authReqId);
+    const authReq = await this.store.getAuthReq(authReqId);
 
     if (!authReq) {
       res.status(500);
@@ -52,7 +52,7 @@ class ProviderCallbackHandler {
       return res.render('error', { error: providerIdentity.error });
     }
 
-    const account = this.accountManager.findAccount(providerIdentity, providerId);
+    const account = await this.accountManager.findAccount(providerIdentity, providerId);
 
     // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
     let claims = {};
@@ -93,7 +93,8 @@ class ProviderCallbackHandler {
     // and loggedIn flag
     // also there could be some use of authReq.expiry
 
-    this.store.deleteAuthReq(authReq.id);
+    // eslint-disable-next-line no-unused-vars
+    const _ = await this.store.deleteAuthReq(authReq.id);
 
     const { responseTypes, redirectURI } = authReq;
 

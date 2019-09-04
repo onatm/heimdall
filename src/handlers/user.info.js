@@ -32,7 +32,7 @@ class UserInfo {
 
     const accessToken = JWT.verify(accessTokenJwt, key);
 
-    const account = this.store.getAccountById(accessToken.sub);
+    const account = await this.store.getAccountById(accessToken.sub);
 
     const scopes = parseAsArray(accessToken.scopes);
 

@@ -1,6 +1,7 @@
 import '@babel/polyfill';
 import http from 'http';
 
+import mongoose from 'mongoose';
 import { JWKS } from '@panva/jose';
 
 import App from './app';
@@ -34,9 +35,16 @@ const providers = [
     }),
   },
 ];
+const mongoURI = 'mongodb://localhost:27018/heimdall';
 
 const keystore = new JWKS.KeyStore();
 keystore.generateSync('RSA', 2048, { use: 'sig' });
+
+mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
+  if (err) {
+    throw err;
+  }
+});
 
 const store = new Store({ keystore, clients, providers });
 const handler = new Handler({ issuer }, store);
