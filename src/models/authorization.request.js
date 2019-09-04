@@ -1,3 +1,5 @@
+/* eslint-disable no-return-assign */
+/* eslint-disable babel/no-invalid-this */
 /* eslint-disable babel/camelcase */
 import mongoose, { Schema } from 'mongoose';
 import nanoid from 'nanoid';
@@ -7,14 +9,26 @@ const AuthorizationRequestSchema = new Schema({
     type: String,
     default: () => nanoid(),
   },
-  clientId: String,
+  client_id: {
+    type: String,
+    alias: 'clientId',
+  },
   audience: [String],
-  responseTypes: [String],
+  response_types: {
+    type: [String],
+    alias: 'responseTypes',
+  },
   scopes: [String],
   state: String,
   nonce: String,
-  redirectURI: String,
-  providerId: String,
+  redirect_uri: {
+    type: String,
+    alias: 'redirectURI',
+  },
+  provider_id: {
+    type: String,
+    alias: 'providerId',
+  },
   expiry: Date,
 }, { versionKey: false, timestamps: { createdAt: 'created_at', updatedAt: false } });
 

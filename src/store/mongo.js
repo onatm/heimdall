@@ -13,7 +13,7 @@ class MongoStore extends BaseStore {
 
   createAuthReq = async authReq => new AuthReq({ ...authReq }).save();
 
-  updateAuthReq = async (id, providerId) => AuthReq.findByIdAndUpdate(id, { $set: { providerId } });
+  updateAuthReq = async (id, providerId) => AuthReq.findByIdAndUpdate(id, { $set: { provider_id: providerId } });
 
   deleteAuthReq = async id => AuthReq.findByIdAndRemove(id);
 
