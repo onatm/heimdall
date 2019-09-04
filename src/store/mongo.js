@@ -9,13 +9,13 @@ class MongoStore extends BaseStore {
     super({ keystore, clients, providers });
   }
 
-  getAuthReq = async id => AuthReq.findById(id);
+  getAuthReq = async id => AuthReq.findOne({ _id: id, expiry: { $gte: new Date().toISOString() }, is_active: true });
 
   createAuthReq = async authReq => new AuthReq({ ...authReq }).save();
 
-  updateAuthReq = async (id, providerId) => AuthReq.findByIdAndUpdate(id, { $set: { provider_id: providerId } });
+  updateAuthReq = async (id, providerId) => AuthReq.findByIdAndUpdate(id, { $set: { provider_id: providerId } }, { new: true });
 
-  deleteAuthReq = async id => AuthReq.findByIdAndRemove(id);
+  deleteAuthReq = async id => AuthReq.findByIdAndUpdate(id, { $set: { is_active: false } }, { new: true });
 
   getAccountById = async id => Account.findById(id);
 
@@ -42,7 +42,7 @@ class MongoStore extends BaseStore {
 
     identities.set(providerId, { user_id: identity.id, ...identity.data });
 
-    const updatedAccount = await Account.findByIdAndUpdate(account.id, { $set: { identities } });
+    const updatedAccount = await Account.findByIdAndUpdate(account.id, { $set: { identities } }, { new: true });
 
     return updatedAccount;
   };
