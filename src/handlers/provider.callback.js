@@ -13,7 +13,11 @@ class ProviderCallbackHandler {
   }
 
   handle = async (req, res) => {
-    const { error, error_description: errorDescription, state: authReqId } = req.query;
+    const {
+      originalUrl,
+      query: { error, error_description: errorDescription, state: authReqId },
+      params: { provider: providerId },
+    } = req;
 
     if (error) {
       res.status(500);
@@ -32,8 +36,6 @@ class ProviderCallbackHandler {
       return res.render('error', { error: "Invalid 'state' parameter provided: not found" });
     }
 
-    const providerId = req.params.provider;
-
     if (providerId !== authReq.providerId) {
       res.status(500);
       return res.render('error', {
@@ -45,7 +47,7 @@ class ProviderCallbackHandler {
 
     const provider = this.store.getProvider(providerId);
 
-    const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, req.originalUrl);
+    const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, originalUrl);
 
     if (providerIdentity.error) {
       res.status(500);

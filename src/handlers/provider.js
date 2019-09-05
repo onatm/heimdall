@@ -4,9 +4,7 @@ class ProviderHandler {
   }
 
   handle = async (req, res) => {
-    const providerId = req.params.provider;
-
-    const authReqId = req.query.req;
+    const { params: { provider: providerId }, query: { req: authReqId } } = req;
 
     const provider = this.store.getProvider(providerId);
 
