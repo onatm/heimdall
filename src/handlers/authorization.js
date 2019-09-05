@@ -24,8 +24,8 @@ class AuthorizationHandler {
     const providers = this.store.getProviders();
 
     const providerInfos = providers.map(p => ({
-      id: p.id,
       type: p.type,
+      id: p.id,
       name: p.name,
       url: `/auth/${p.id}?req=${authReqId}`,
     }));

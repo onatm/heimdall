@@ -13,7 +13,7 @@ class BaseStore {
 
   getProviders = () => this.providers;
 
-  getProvider = id => this.providers.find(p => p.id === id).internal;
+  getProvider = id => this.providers.find(p => p.id === id);
 }
 
 export default BaseStore;

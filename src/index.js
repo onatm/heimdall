@@ -7,47 +7,46 @@ import { JWKS } from '@panva/jose';
 import App from './app';
 import Store from './store';
 import Handler from './handlers';
-import GithubProvider from './providers/github';
+import createProviders from './providers';
 
 const port = process.env.PORT || '5666';
-const issuer = 'http://localhost:5666';
-const clients = [
-  {
-    id: 'heimdall-sample-app',
-    redirectURI: 'http://localhost:3000/callback',
-    audience: ['heimdall-sample-api'],
-    scopes: ['read:messages'],
-  }];
-const providers = [
-  {
-    type: 'github',
-    id: 'github',
-    name: 'GitHub',
-    config: {
-      clientId: '',
-      clientSecret: '',
-    },
-    internal: new GithubProvider({
-      clientId: '',
-      clientSecret: '',
-      id: 'github',
-      issuer,
-    }),
-  },
-];
-const mongoURI = 'mongodb://localhost:27018/heimdall';
 
+const config = {
+  issuer: 'http://localhost:5666',
+  mongoURI: 'mongodb://localhost:27018/heimdall',
+  clients: [
+    {
+      id: 'heimdall-sample-app',
+      redirectURI: 'http://localhost:3000/callback',
+      audience: ['heimdall-sample-api'],
+      scopes: ['read:messages'],
+    },
+  ],
+  providers: [
+    {
+      type: 'github',
+      id: 'github',
+      name: 'GitHub',
+      config: {
+        clientId: '',
+        clientSecret: '',
+      },
+    },
+  ],
+};
+
+const providers = createProviders(config);
 const keystore = new JWKS.KeyStore();
 keystore.generateSync('RSA', 2048, { use: 'sig' });
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
+mongoose.connect(config.mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
   if (err) {
     throw err;
   }
 });
 
-const store = new Store({ keystore, clients, providers });
-const handler = new Handler({ issuer }, store);
+const store = new Store({ keystore, clients: config.clients, providers });
+const handler = new Handler({ issuer: config.issuer }, store);
 const { app } = new App({ handler, port });
 
 const server = http.createServer(app);

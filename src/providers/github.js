@@ -7,21 +7,24 @@ const emailScope = 'user:email';
 const orgsScope = 'read:org';
 
 class GithubProvider {
-  constructor(config) {
-    this.config = config;
+  constructor({
+    id, name, clientId, clientSecret, issuer,
+  }) {
+    this.type = 'github';
+    this.id = id;
+    this.name = name;
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.issuer = issuer;
   }
 
   getCallbackUrl = (authReqId, scopes) => {
-    const {
-      clientId, clientSecret, id, issuer,
-    } = this.config;
-
     const githubAuth = new ClientOAuth2({
-      clientId,
-      clientSecret,
+      clientId: this.clientId,
+      clientSecret: this.clientSecret,
       accessTokenUri: 'https://github.com/login/oauth/access_token',
       authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `${issuer}/auth/${id}/callback`,
+      redirectUri: `${this.issuer}/auth/${this.id}/callback`,
       state: authReqId,
       scopes: this.getScopes(scopes),
     });
@@ -30,16 +33,12 @@ class GithubProvider {
   };
 
   handleCallback = async (authReqId, scopes, originalUrl) => {
-    const {
-      clientId, clientSecret, id, issuer,
-    } = this.config;
-
     const githubAuth = new ClientOAuth2({
-      clientId,
-      clientSecret,
+      clientId: this.clientId,
+      clientSecret: this.clientSecret,
       accessTokenUri: 'https://github.com/login/oauth/access_token',
       authorizationUri: 'https://github.com/login/oauth/authorize',
-      redirectUri: `${issuer}/auth/${id}/callback`,
+      redirectUri: `${this.issuer}/auth/${this.id}/callback`,
       state: authReqId,
       scopes: this.getScopes(scopes),
     });
