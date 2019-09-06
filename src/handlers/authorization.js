@@ -1,5 +1,6 @@
-import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../consts';
-import { parseAsArray } from '../utils';
+import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../oauth2/consts';
+
+import { parseAsArray } from './utils';
 
 class AuthorizationHandler {
   constructor(store) {

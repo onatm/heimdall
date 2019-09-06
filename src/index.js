@@ -8,6 +8,7 @@ import App from './app';
 import Store from './store';
 import Handler from './handlers';
 import createProviders from './providers';
+import AccountManager from './account/manager';
 
 const port = process.env.PORT || '5666';
 
@@ -46,7 +47,8 @@ mongoose.connect(config.mongoURI, { useNewUrlParser: true, useFindAndModify: fal
 });
 
 const store = new Store({ keystore, clients: config.clients, providers });
-const handler = new Handler({ issuer: config.issuer }, store);
+const accountManager = new AccountManager(store);
+const handler = new Handler(config, store, accountManager);
 const { app } = new App({ handler, port });
 
 const server = http.createServer(app);

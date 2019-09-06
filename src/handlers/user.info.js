@@ -1,7 +1,7 @@
 /* eslint-disable babel/camelcase */
-import { JWT } from '@panva/jose';
+import { verifyAccessToken } from '../oauth2';
 
-import { parseAsArray } from '../utils';
+import { parseAsArray } from './utils';
 
 class UserInfo {
   constructor(store) {
@@ -30,7 +30,7 @@ class UserInfo {
     const keystore = this.store.getKeystore();
     const key = keystore.get({ kty: 'RSA' });
 
-    const accessToken = JWT.verify(accessTokenJwt, key);
+    const accessToken = verifyAccessToken(accessTokenJwt, key);
 
     const account = await this.store.getAccountById(accessToken.sub);
 

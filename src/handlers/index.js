@@ -6,12 +6,12 @@ import ProviderCallbackHandler from './provider.callback';
 import UserInfoHandler from './user.info';
 
 class Handler {
-  constructor(config, store) {
-    this._discoveryHandler = new DiscoveryHandler(config);
+  constructor({ issuer }, store, accountManager) {
+    this._discoveryHandler = new DiscoveryHandler({ issuer });
     this._keystoreHandler = new KeystoreHandler(store);
     this._authorizationHandler = new AuthorizationHandler(store);
     this._providerHandler = new ProviderHandler(store);
-    this._providerCallbackHandler = new ProviderCallbackHandler(config, store);
+    this._providerCallbackHandler = new ProviderCallbackHandler({ issuer }, store, accountManager);
     this._userInfoHandler = new UserInfoHandler(store);
   }
 

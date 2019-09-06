@@ -1,19 +1,17 @@
 /* eslint-disable babel/camelcase */
-import { supportedResponseTypes } from '../consts';
+import { supportedResponseTypes } from '../oauth2/consts';
 
 class DiscoveryHandler {
-  constructor(config) {
-    this.config = config;
+  constructor({ issuer }) {
+    this.issuer = issuer;
   }
 
   handle = async (_, res) => {
-    const { issuer } = this.config;
-
     const discovery = {
-      issuer,
-      authorization_endpoint: `${issuer}/auth`,
-      jwks_uri: `${issuer}/jwks`,
-      userinfo_endpoint: `${issuer}/userinfo`,
+      issuer: this.issuer,
+      authorization_endpoint: `${this.issuer}/auth`,
+      jwks_uri: `${this.issuer}/jwks`,
+      userinfo_endpoint: `${this.issuer}/userinfo`,
       scopes_supported: ['openid', 'profile', 'email', 'groups'],
       claims_supported:
         [

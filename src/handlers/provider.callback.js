@@ -1,15 +1,14 @@
 /* eslint-disable babel/camelcase */
 import querystring from 'querystring';
 
-import { responseTypeToken } from '../consts';
-import Oauth2 from '../oauth2';
-import AccountManager from '../account/manager';
+import { responseTypeToken } from '../oauth2/consts';
+import { newAccessToken, newIdToken } from '../oauth2';
 
 class ProviderCallbackHandler {
-  constructor(config, store) {
-    this.config = config;
+  constructor({ issuer }, store, accountManager) {
+    this.issuer = issuer;
     this.store = store;
-    this.accountManager = new AccountManager(store);
+    this.accountManager = accountManager;
   }
 
   handle = async (req, res) => {
@@ -103,13 +102,12 @@ class ProviderCallbackHandler {
     const keystore = this.store.getKeystore();
     const key = keystore.get({ kty: 'RSA' });
 
-    const oauth2 = new Oauth2(key);
-
     let accessToken;
 
     if (responseTypes.includes(responseTypeToken)) {
-      accessToken = oauth2.newAccessToken(
-        this.config.issuer,
+      accessToken = newAccessToken(
+        key,
+        this.issuer,
         account.id,
         authReq.audience,
         authReq.clientId,
@@ -117,8 +115,9 @@ class ProviderCallbackHandler {
       );
     }
 
-    const idToken = oauth2.newIdToken(
-      this.config.issuer,
+    const idToken = newIdToken(
+      key,
+      this.issuer,
       account.id,
       authReq.clientId,
       authReq.nonce,
