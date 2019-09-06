@@ -22,7 +22,7 @@ class AuthorizationHandler {
 
     const { id: authReqId } = await this.store.createAuthReq(authReq);
 
-    const providers = this.store.getProviders();
+    const { providers } = this.store;
 
     const providerInfos = providers.map(p => ({
       type: p.type,

@@ -4,8 +4,8 @@ import nanoid from 'nanoid';
 import BaseStore from './base';
 
 class MemoryStore extends BaseStore {
-  constructor({ keystore, clients, providers }) {
-    super({ keystore, clients, providers });
+  constructor({ keystore, providers, clients }) {
+    super({ keystore, providers, clients });
     this.authRequests = [];
     this.accounts = [];
   }

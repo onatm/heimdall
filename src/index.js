@@ -46,7 +46,7 @@ mongoose.connect(config.mongoURI, { useNewUrlParser: true, useFindAndModify: fal
   }
 });
 
-const store = new Store({ keystore, clients: config.clients, providers });
+const store = new Store({ keystore, providers, clients: config.clients });
 const accountManager = new AccountManager(store);
 const handler = new Handler(config, store, accountManager);
 const { app } = new App({ handler, port });

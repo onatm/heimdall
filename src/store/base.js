@@ -1,19 +1,21 @@
 class BaseStore {
-  constructor({ keystore, clients, providers }) {
+  constructor({ keystore, providers, clients }) {
     this._keystore = keystore;
+    this._providers = providers;
     this.clients = clients;
-    this.providers = providers;
   }
 
   get keystore() {
     return this._keystore;
   }
 
+  get providers() {
+    return this._providers;
+  }
+
+  getProvider = id => this._providers.find(p => p.id === id);
+
   getClient = id => this.clients.find(c => c.id === id);
-
-  getProviders = () => this.providers;
-
-  getProvider = id => this.providers.find(p => p.id === id);
 }
 
 export default BaseStore;
