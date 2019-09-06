@@ -7,8 +7,9 @@ import UserInfoHandler from './user.info';
 
 class Handler {
   constructor({ issuer }, store, accountManager) {
+    const { keystore } = store;
     this._discoveryHandler = new DiscoveryHandler({ issuer });
-    this._keystoreHandler = new KeystoreHandler(store);
+    this._keystoreHandler = new KeystoreHandler(keystore);
     this._authorizationHandler = new AuthorizationHandler(store);
     this._providerHandler = new ProviderHandler(store);
     this._providerCallbackHandler = new ProviderCallbackHandler({ issuer }, store, accountManager);

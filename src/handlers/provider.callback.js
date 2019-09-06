@@ -99,7 +99,7 @@ class ProviderCallbackHandler {
 
     const { responseTypes, redirectURI } = authReq;
 
-    const keystore = this.store.getKeystore();
+    const { keystore } = this.store;
     const key = keystore.get({ kty: 'RSA' });
 
     let accessToken;

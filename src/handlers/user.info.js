@@ -27,7 +27,7 @@ class UserInfo {
 
     const accessTokenJwt = authorization.slice(7);
 
-    const keystore = this.store.getKeystore();
+    const { keystore } = this.store;
     const key = keystore.get({ kty: 'RSA' });
 
     const accessToken = verifyAccessToken(accessTokenJwt, key);

@@ -1,13 +1,13 @@
 class BaseStore {
   constructor({ keystore, clients, providers }) {
-    this.keystore = keystore;
+    this._keystore = keystore;
     this.clients = clients;
     this.providers = providers;
   }
 
-  getPublicJWKS = () => this.keystore.toJWKS(false);
-
-  getKeystore = () => this.keystore;
+  get keystore() {
+    return this._keystore;
+  }
 
   getClient = id => this.clients.find(c => c.id === id);
 
