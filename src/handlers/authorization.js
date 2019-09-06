@@ -114,24 +114,19 @@ class AuthorizationHandler {
       return redirectError('invalid_request', 'No response_type provided');
     }
 
-    let idTokenEnabled = false;
-    let tokenEnabled = false;
+    const invalidResponseTypes = responseTypes.filter(rt => rt !== responseTypeIdToken && rt !== responseTypeToken);
 
-    for (let i = 0; i < responseTypes.length; i++) {
-      switch (responseTypes[i]) {
-        case responseTypeIdToken:
-          idTokenEnabled = true;
-          break;
-        case responseTypeToken:
-          tokenEnabled = true;
-          break;
-        default:
-          return redirectError('invalid_request', `Invalid response type ${responseTypes[i]}`);
-      }
+    if (invalidResponseTypes && invalidResponseTypes.length > 0) {
+      return redirectError('invalid_request', `Invalid response type(s) ${invalidResponseTypes.join(', ')}`);
+    }
 
-      if (!supportedResponseTypes.includes(responseTypes[i])) {
-        return redirectError('unsupported_response_type', `Unsupported response type ${responseTypes[i]}`);
-      }
+    const idTokenEnabled = responseTypes.includes(responseTypeIdToken);
+    const tokenEnabled = responseTypes.includes(responseTypeToken);
+
+    const unsupportedResponseTypes = responseTypes.filter(rt => !supportedResponseTypes.includes(rt));
+
+    if (unsupportedResponseTypes && unsupportedResponseTypes.length > 0) {
+      return redirectError('unsupported_response_type', `Unsupported response type(s) ${unsupportedResponseTypes.join(', ')}`);
     }
 
     if (tokenEnabled && !idTokenEnabled) {
