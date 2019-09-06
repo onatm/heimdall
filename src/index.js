@@ -3,15 +3,14 @@ import http from 'http';
 import fs from 'fs';
 
 import commandLineArgs from 'command-line-args';
-import yaml from 'js-yaml';
 import mongoose from 'mongoose';
 import { JWKS } from '@panva/jose';
 
 import App from './app';
 import Store from './store';
 import Handler from './handlers';
-import createProviders from './providers';
 import AccountManager from './account/manager';
+import createConfig from './config';
 
 const optionDefinitions = [
   { name: 'config', alias: 'c', type: String },
@@ -21,21 +20,22 @@ const options = commandLineArgs(optionDefinitions);
 
 const port = process.env.PORT || '5666';
 
-const config = yaml.safeLoad(fs.readFileSync(options.config, 'utf8'));
+const {
+  issuer, mongoURI, expiry, providers, clients,
+} = createConfig(fs.readFileSync(options.config, 'utf8'));
 
-const providers = createProviders(config);
 const keystore = new JWKS.KeyStore();
 keystore.generateSync('RSA', 2048, { use: 'sig' });
 
-mongoose.connect(config.mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
+mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
   if (err) {
     throw err;
   }
 });
 
-const store = new Store({ keystore, providers, clients: config.clients });
+const store = new Store({ keystore, providers, clients });
 const accountManager = new AccountManager(store);
-const handler = new Handler(config, store, accountManager);
+const handler = new Handler({ issuer, expiry }, store, accountManager);
 const { app } = new App({ handler, port });
 
 const server = http.createServer(app);

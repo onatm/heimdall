@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import GithubProvider from './github';
+import GithubProvider from '../providers/github';
 
 const createProviders = (config) => {
   if (!config.providers || config.providers.length === 0) {

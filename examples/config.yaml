@@ -3,8 +3,8 @@ issuer: http://localhost:5666
 mongoURI: mongodb://localhost:27018/heimdall
 
 expiry:
-  idToken: '24 hours'
-  accessToken: '24 hours'
+  idToken: '6 hours'
+  accessToken: '6 hours'
 
 clients:
 - id: heimdall-sample-app
