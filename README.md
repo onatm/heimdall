@@ -20,4 +20,5 @@ There are some missing functionality that should be implemented before *v1.0*.
 - [ ] Silent callback
 - [ ] Create sample app repository
 - [ ] Encrypt provider `access_token` in `mongodb`
+- [ ] Add logging
 - [ ] Add proper documentation and explain the decisions made (e.g. why there is no consent)
