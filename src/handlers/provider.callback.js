@@ -7,8 +7,9 @@ import {
 import { newAccessToken, newIdToken } from '../oauth2';
 
 class ProviderCallbackHandler {
-  constructor({ issuer }, store, accountManager) {
+  constructor({ issuer, expiry }, store, accountManager) {
     this.issuer = issuer;
+    this.expiry = expiry;
     this.store = store;
     this.accountManager = accountManager;
   }
@@ -114,6 +115,7 @@ class ProviderCallbackHandler {
         authReq.audience,
         authReq.clientId,
         authReq.scopes,
+        this.expiry.accessToken,
       );
     }
 
@@ -125,6 +127,7 @@ class ProviderCallbackHandler {
       authReq.nonce,
       claims,
       accessToken,
+      this.expiry.idToken,
     );
 
     let values = {

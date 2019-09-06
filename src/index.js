@@ -15,6 +15,10 @@ const port = process.env.PORT || '5666';
 const config = {
   issuer: 'http://localhost:5666',
   mongoURI: 'mongodb://localhost:27018/heimdall',
+  expiry: {
+    idToken: '24 hours',
+    accessToken: '24 hours',
+  },
   clients: [
     {
       id: 'heimdall-sample-app',

@@ -14,7 +14,7 @@ There are some missing functionality that should be implemented before *v1.0*.
 - [x] Extract account management code
 - [x] Add `mongodb` store
 - [x] Add `memory` store
-- [ ] Decision about configurable parameters
+- [x] Decision about configurable parameters
 - [ ] Pass configuration from `YAML` files
 - [ ] Create sample app repository
 - [ ] Encrypt provider `access_token` in `mongodb`
