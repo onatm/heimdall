@@ -3,4 +3,22 @@ const responseTypeToken = 'token';
 
 const supportedResponseTypes = [responseTypeToken, responseTypeIdToken, `${responseTypeIdToken} ${responseTypeToken}`];
 
-export { supportedResponseTypes, responseTypeToken, responseTypeIdToken };
+const scopeOpenId = 'openid';
+const scopeProfile = 'profile';
+const scopeEmail = 'email';
+const scopeGroups = 'groups';
+const scopeAudiencePrefix = 'audience:';
+
+const supportedScopes = [scopeOpenId, scopeProfile, scopeEmail, scopeGroups];
+
+export {
+  supportedResponseTypes,
+  responseTypeToken,
+  responseTypeIdToken,
+  supportedScopes,
+  scopeOpenId,
+  scopeProfile,
+  scopeEmail,
+  scopeGroups,
+  scopeAudiencePrefix,
+};

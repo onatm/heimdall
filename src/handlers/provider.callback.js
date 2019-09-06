@@ -1,7 +1,9 @@
 /* eslint-disable babel/camelcase */
 import querystring from 'querystring';
 
-import { responseTypeToken } from '../oauth2/consts';
+import {
+  responseTypeToken, scopeProfile, scopeEmail, scopeGroups,
+} from '../oauth2/consts';
 import { newAccessToken, newIdToken } from '../oauth2';
 
 class ProviderCallbackHandler {
@@ -58,14 +60,14 @@ class ProviderCallbackHandler {
     // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
     let claims = {};
 
-    if (authReq.scopes.includes('profile')) {
+    if (authReq.scopes.includes(scopeProfile)) {
       claims = {
         name: account.name,
         username: account.username,
       };
     }
 
-    if (authReq.scopes.includes('email')) {
+    if (authReq.scopes.includes(scopeEmail)) {
       claims = {
         ...claims,
         email: account.email,
@@ -73,7 +75,7 @@ class ProviderCallbackHandler {
       };
     }
 
-    if (authReq.scopes.includes('groups')) {
+    if (authReq.scopes.includes(scopeGroups)) {
       claims = {
         ...claims,
         groups: providerIdentity.groups,

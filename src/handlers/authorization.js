@@ -1,4 +1,13 @@
-import { supportedResponseTypes, responseTypeToken, responseTypeIdToken } from '../oauth2/consts';
+import {
+  supportedResponseTypes,
+  responseTypeToken,
+  responseTypeIdToken,
+  scopeOpenId,
+  scopeProfile,
+  scopeEmail,
+  scopeGroups,
+  scopeAudiencePrefix,
+} from '../oauth2/consts';
 
 import { parseAsArray } from './utils';
 
@@ -75,15 +84,15 @@ class AuthorizationHandler {
 
     for (let i = 0; i < scopes.length; i++) {
       switch (scopes[i]) {
-        case 'openid':
+        case scopeOpenId:
           hasOpenIdScope = true;
           break;
-        case 'profile':
-        case 'email':
-        case 'groups':
+        case scopeProfile:
+        case scopeEmail:
+        case scopeGroups:
           break;
         default:
-          if (scopes[i].startsWith('audience:')) {
+          if (scopes[i].startsWith(scopeAudiencePrefix)) {
             const audienceScope = scopes[i].slice(9);
             if (client.audience.includes(audienceScope)) {
               audience.push(audienceScope);

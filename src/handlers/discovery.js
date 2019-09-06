@@ -1,5 +1,5 @@
 /* eslint-disable babel/camelcase */
-import { supportedResponseTypes } from '../oauth2/consts';
+import { supportedResponseTypes, supportedScopes } from '../oauth2/consts';
 
 class DiscoveryHandler {
   constructor({ issuer }) {
@@ -12,7 +12,7 @@ class DiscoveryHandler {
       authorization_endpoint: `${this.issuer}/auth`,
       jwks_uri: `${this.issuer}/jwks`,
       userinfo_endpoint: `${this.issuer}/userinfo`,
-      scopes_supported: ['openid', 'profile', 'email', 'groups'],
+      scopes_supported: supportedScopes,
       claims_supported:
         [
           'iss',
