@@ -77,38 +77,28 @@ class AuthorizationHandler {
 
     const scopes = parseAsArray(q.scope);
 
-    let hasOpenIdScope = false;
+    if (!scopes.includes(scopeOpenId)) {
+      return redirectError('invalid_scope', 'Missing required scope(s) [\'openid\']');
+    }
+
     const audience = [];
     const invalidScopes = [];
     const unrecognizedScopes = [];
 
-    for (let i = 0; i < scopes.length; i++) {
-      switch (scopes[i]) {
-        case scopeOpenId:
-          hasOpenIdScope = true;
-          break;
-        case scopeProfile:
-        case scopeEmail:
-        case scopeGroups:
-          break;
-        default:
-          if (scopes[i].startsWith(scopeAudiencePrefix)) {
-            const audienceScope = scopes[i].slice(9);
-            if (client.audience.includes(audienceScope)) {
-              audience.push(audienceScope);
-            } else {
-              invalidScopes.push(scopes[i]);
-            }
-          } else if (!client.scopes || !client.scopes.includes(scopes[i])) {
-            unrecognizedScopes.push(scopes[i]);
+    scopes
+      .filter(scope => scope !== scopeOpenId && scope !== scopeProfile && scope !== scopeEmail && scope !== scopeGroups)
+      .forEach((scope) => {
+        if (scope.startsWith(scopeAudiencePrefix)) {
+          const audienceScope = scope.slice(9);
+          if (client.audience && client.audience.includes(audienceScope)) {
+            audience.push(audienceScope);
+          } else {
+            invalidScopes.push(scope);
           }
-          break;
-      }
-    }
-
-    if (!hasOpenIdScope) {
-      return redirectError('invalid_scope', 'Missing required scope(s) [\'openid\']');
-    }
+        } else if (!client.scopes || !client.scopes.includes(scope)) {
+          unrecognizedScopes.push(scope);
+        }
+      });
 
     if (unrecognizedScopes.length > 0) {
       return redirectError('invalid_scope', `Unrecognized scope(s) ${unrecognizedScopes.join(', ')}`);
