@@ -1,0 +1,23 @@
+issuer: http://localhost:5666
+
+mongoURI: mongodb://localhost:27018/heimdall
+
+expiry:
+  idToken: '24 hours'
+  accessToken: '24 hours'
+
+clients:
+- id: heimdall-sample-app
+  redirectURI: http://localhost:3000/callback
+  audience:
+  - heimdall-sample-api
+  scopes:
+  - read:messages
+
+providers:
+- type: github
+  id: github
+  name: GitHub
+  config:
+    clientId: clientId
+    clientSecret: clientSecret

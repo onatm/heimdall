@@ -4,7 +4,7 @@
   "description": "Implicit OpenID Connect (OIDC) and OAuth 2.0 Provider with opinionated identity management",
   "main": "src/index.js",
   "scripts": {
-    "start": "NODE_ENV=debug nodemon --exec babel-node src/index.js",
+    "start": "NODE_ENV=debug nodemon --exec babel-node src/index.js -- --config examples/config.yaml",
     "build": "babel src -d dist",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
@@ -20,9 +20,11 @@
     "@panva/jose": "1.6.1",
     "axios": "0.19.0",
     "client-oauth2": "4.2.5",
+    "command-line-args": "5.1.1",
     "cors": "2.8.5",
     "express": "4.17.1",
     "express-react-views": "0.11.0",
+    "js-yaml": "3.13.1",
     "mongoose": "5.6.12",
     "nanoid": "2.0.3",
     "oidc-token-hash": "3.0.2",

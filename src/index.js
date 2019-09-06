@@ -1,6 +1,9 @@
 import '@babel/polyfill';
 import http from 'http';
+import fs from 'fs';
 
+import commandLineArgs from 'command-line-args';
+import yaml from 'js-yaml';
 import mongoose from 'mongoose';
 import { JWKS } from '@panva/jose';
 
@@ -10,35 +13,15 @@ import Handler from './handlers';
 import createProviders from './providers';
 import AccountManager from './account/manager';
 
+const optionDefinitions = [
+  { name: 'config', alias: 'c', type: String },
+];
+
+const options = commandLineArgs(optionDefinitions);
+
 const port = process.env.PORT || '5666';
 
-const config = {
-  issuer: 'http://localhost:5666',
-  mongoURI: 'mongodb://localhost:27018/heimdall',
-  expiry: {
-    idToken: '24 hours',
-    accessToken: '24 hours',
-  },
-  clients: [
-    {
-      id: 'heimdall-sample-app',
-      redirectURI: 'http://localhost:3000/callback',
-      audience: ['heimdall-sample-api'],
-      scopes: ['read:messages'],
-    },
-  ],
-  providers: [
-    {
-      type: 'github',
-      id: 'github',
-      name: 'GitHub',
-      config: {
-        clientId: '',
-        clientSecret: '',
-      },
-    },
-  ],
-};
+const config = yaml.safeLoad(fs.readFileSync(options.config, 'utf8'));
 
 const providers = createProviders(config);
 const keystore = new JWKS.KeyStore();

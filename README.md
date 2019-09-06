@@ -15,7 +15,7 @@ There are some missing functionality that should be implemented before *v1.0*.
 - [x] Add `mongodb` store
 - [x] Add `memory` store
 - [x] Decision about configurable parameters
-- [ ] Pass configuration from `YAML` files
+- [x] Pass configuration from `YAML` files
 - [ ] Api resource scopes
 - [ ] Silent callback
 - [ ] Create sample app repository
