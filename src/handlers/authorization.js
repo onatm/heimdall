@@ -71,7 +71,8 @@ class AuthorizationHandler {
     const redirectError = (error, description) => ({
       error: {
         type: 'redirect',
-        redirectURI: `${redirectURI}&error=${error}&error_description=${description}&state=${state}`,
+        // the only response mode is fragment
+        redirectURI: `${redirectURI}#error=${error}&error_description=${description}&state=${state}`,
       },
     });
 
