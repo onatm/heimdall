@@ -1,6 +1,7 @@
 import path from 'path';
 
 import express from 'express';
+import helmet from 'helmet';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
 import reactViews from 'express-react-views';
@@ -9,6 +10,13 @@ class App {
   constructor({ handler, port, sessionKeys }) {
     this._app = express();
     this._app.set('port', port);
+    this._app.use(helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+        },
+      },
+    }));
     this._app.use(cors());
     this._app.use(cookieSession({
       name: 'heimdall',
