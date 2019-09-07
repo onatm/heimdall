@@ -64,7 +64,7 @@ class ProviderCallbackHandler {
     if (authReq.scopes.includes(scopeProfile)) {
       claims = {
         name: account.name,
-        username: account.username,
+        preferred_username: account.username,
       };
     }
 

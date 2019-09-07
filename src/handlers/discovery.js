@@ -27,7 +27,6 @@ class DiscoveryHandler {
           'email',
           'email_verified',
           'auth_time',
-          'updated_at',
           'at_hash',
           'groups',
           'provider_claims',

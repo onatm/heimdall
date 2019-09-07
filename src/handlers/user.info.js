@@ -43,7 +43,7 @@ class UserInfo {
     if (scopes.includes('profile')) {
       userInfo = {
         name: account.name,
-        username: account.username,
+        preferred_username: account.username,
       };
     }
 
