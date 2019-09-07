@@ -6,8 +6,8 @@ import createProviders from './providers';
 import createClients from './clients';
 
 const defaultExpiry = {
-  idToken: '24 hours',
-  accessToken: '24 hours',
+  idToken: 86400,
+  accessToken: 86400,
 };
 
 const createConfig = (file) => {

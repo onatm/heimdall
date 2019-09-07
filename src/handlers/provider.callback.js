@@ -76,6 +76,15 @@ class ProviderCallbackHandler {
       };
     }
 
+    const now = Math.floor(new Date().getTime() / 1000);
+
+    if (authReq.maxAge) {
+      claims = {
+        ...claims,
+        auth_time: now,
+      };
+    }
+
     if (authReq.scopes.includes(scopeGroups)) {
       claims = {
         ...claims,
@@ -100,14 +109,14 @@ class ProviderCallbackHandler {
     // eslint-disable-next-line no-unused-vars
     const _ = await this.store.deleteAuthReq(authReq.id);
 
-    const { responseTypes, redirectURI } = authReq;
-
     const { keystore } = this.store;
     const key = keystore.get({ kty: 'RSA' });
 
     let accessToken;
 
-    if (responseTypes.includes(responseTypeToken)) {
+    if (authReq.responseTypes.includes(responseTypeToken)) {
+      const accessTokenExpiry = now + Math.round(this.expiry.accessToken);
+
       accessToken = newAccessToken(
         key,
         this.issuer,
@@ -115,9 +124,11 @@ class ProviderCallbackHandler {
         authReq.audience,
         authReq.clientId,
         authReq.scopes,
-        this.expiry.accessToken,
+        accessTokenExpiry,
       );
     }
+
+    const idTokenExpiry = now + Math.round(this.expiry.idToken);
 
     const idToken = newIdToken(
       key,
@@ -127,7 +138,7 @@ class ProviderCallbackHandler {
       authReq.nonce,
       claims,
       accessToken,
-      this.expiry.idToken,
+      idTokenExpiry,
     );
 
     let values = {
@@ -139,11 +150,12 @@ class ProviderCallbackHandler {
       values = {
         token_type: 'bearer',
         access_token: accessToken,
+        expires_in: this.expiry.accessToken,
         ...values,
       };
     }
 
-    return res.redirect(`${redirectURI}#${querystring.stringify(values)}`);
+    return res.redirect(`${authReq.redirectURI}#${querystring.stringify(values)}`);
   };
 }
 

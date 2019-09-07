@@ -26,6 +26,7 @@ class DiscoveryHandler {
           'picture',
           'email',
           'email_verified',
+          'auth_time',
           'updated_at',
           'at_hash',
           'groups',

@@ -25,6 +25,10 @@ const AuthorizationRequestSchema = new Schema({
     type: String,
     alias: 'redirectURI',
   },
+  max_age: {
+    type: Number,
+    alias: 'maxAge',
+  },
   provider_id: {
     type: String,
     alias: 'providerId',

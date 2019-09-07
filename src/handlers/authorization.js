@@ -45,7 +45,7 @@ class AuthorizationHandler {
 
   parseAuthorizationRequest = (q) => {
     const {
-      client_id: clientId, redirect_uri: redirectURI, state, nonce,
+      client_id: clientId, redirect_uri: redirectURI, state, nonce, max_age: maxAge,
     } = q;
 
     const client = this.store.getClient(clientId);
@@ -137,10 +137,14 @@ class AuthorizationHandler {
       return redirectError('invalid_request', 'Response type \'token\' requires a \'nonce\' value');
     }
 
+    if (maxAge && (!parseInt(maxAge, 10) || maxAge < 0)) {
+      return redirectError('invalid_request', 'max_age must be a non-negative number');
+    }
+
     const expiry = new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
     return {
-      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, expiry,
+      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, maxAge, expiry,
     };
   };
 }

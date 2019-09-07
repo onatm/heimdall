@@ -2,19 +2,20 @@
 import { JWT } from '@panva/jose';
 import oidcTokenHash from 'oidc-token-hash';
 
-const newAccessToken = (key, iss, sub, aud, azp, scopes, expiry) => {
+const newAccessToken = (key, iss, sub, aud, azp, scopes, exp) => {
   const accessToken = {
     iss,
     sub,
     aud,
     azp,
+    exp,
     scopes: scopes.join(' '),
   };
 
-  return JWT.sign(accessToken, key, { expiresIn: expiry });
+  return JWT.sign(accessToken, key);
 };
 
-const newIdToken = (key, iss, sub, aud, nonce, claims, accessToken, expiry) => {
+const newIdToken = (key, iss, sub, aud, nonce, claims, accessToken, exp) => {
   let atHash;
   if (accessToken) {
     atHash = oidcTokenHash.generate(accessToken, key.alg);
@@ -27,9 +28,10 @@ const newIdToken = (key, iss, sub, aud, nonce, claims, accessToken, expiry) => {
     nonce,
     at_hash: atHash,
     ...claims,
+    exp,
   };
 
-  return JWT.sign(idToken, key, { expiresIn: expiry });
+  return JWT.sign(idToken, key);
 };
 
 const verifyAccessToken = (accessTokenJwt, key) => JWT.verify(accessTokenJwt, key);
