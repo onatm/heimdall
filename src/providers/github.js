@@ -2,9 +2,11 @@
 import ClientOAuth2 from 'client-oauth2';
 import axios from 'axios';
 
+import { scopeEmail, scopeGroups } from '../oauth2/consts';
+
 const apiUrl = 'https://api.github.com';
-const emailScope = 'user:email';
-const orgsScope = 'read:org';
+const githubScopeEmail = 'user:email';
+const githubScopeGroups = 'read:org';
 
 class GithubProvider {
   constructor({
@@ -55,18 +57,24 @@ class GithubProvider {
       return { error: 'github: failed to get user' };
     }
 
-    const githubEmail = await this.getEmail(token);
-
-    if (!githubEmail) {
-      return { error: 'github: user has no verified, primary email' };
-    }
-
     let identity = {
       ...githubUser,
-      email: githubEmail.email,
     };
 
-    if (scopes.includes('groups')) {
+    if (scopes.includes(scopeEmail)) {
+      const githubEmail = await this.getEmail(token);
+
+      if (!githubEmail) {
+        return { error: 'github: user has no verified, primary email' };
+      }
+
+      identity = {
+        ...identity,
+        email: githubEmail.email,
+      };
+    }
+
+    if (scopes.includes(scopeGroups)) {
       const orgs = await this.getOrgs(token);
 
       if (!orgs) {
@@ -188,12 +196,12 @@ class GithubProvider {
   getScopes = (scopes) => {
     const githubScopes = [];
 
-    if (scopes.includes('email')) {
-      githubScopes.push(emailScope);
+    if (scopes.includes(scopeEmail)) {
+      githubScopes.push(githubScopeEmail);
     }
 
-    if (scopes.includes('groups')) {
-      githubScopes.push(orgsScope);
+    if (scopes.includes(scopeGroups)) {
+      githubScopes.push(githubScopeGroups);
     }
 
     return githubScopes.join(' ');
