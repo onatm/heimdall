@@ -7,6 +7,9 @@ import {
   scopeEmail,
   scopeGroups,
   scopeAudiencePrefix,
+  promptTypes,
+  promptLogin,
+  promptNone,
 } from '../oauth2/consts';
 
 import { parseAsArray } from './utils';
@@ -142,10 +145,26 @@ class AuthorizationHandler {
       return redirectError('invalid_request', 'max_age must be a non-negative number');
     }
 
+    const prompt = parseAsArray(q.prompt);
+
+    if (prompt.length === 0) {
+      prompt.push(promptLogin);
+    }
+
+    const unknownPrompts = prompt.filter(p => !promptTypes.includes(p));
+
+    if (unknownPrompts && unknownPrompts.length > 0) {
+      return redirectError('invalid_request', `unknown prompt(s) ${unknownPrompts.join(', ')}`);
+    }
+
+    if (prompt.includes(promptNone) && prompt.length > 1) {
+      return redirectError('invalid_request', 'prompt \'none\' cannot be used with other values');
+    }
+
     const expiry = new Date(Date.now() + 1000 * 60 * 5).toISOString();
 
     return {
-      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, maxAge, expiry,
+      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, prompt, maxAge, expiry,
     };
   };
 }

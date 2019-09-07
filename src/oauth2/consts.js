@@ -11,6 +11,13 @@ const scopeAudiencePrefix = 'audience:';
 
 const supportedScopes = [scopeOpenId, scopeProfile, scopeEmail, scopeGroups];
 
+const promptNone = 'none';
+const promptLogin = 'login';
+const promptConsent = 'consent';
+const promptSelectAccount = 'select_account';
+
+const promptTypes = [promptNone, promptLogin, promptConsent, promptSelectAccount];
+
 export {
   supportedResponseTypes,
   responseTypeToken,
@@ -21,4 +28,7 @@ export {
   scopeEmail,
   scopeGroups,
   scopeAudiencePrefix,
+  promptTypes,
+  promptNone,
+  promptLogin,
 };
