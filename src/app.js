@@ -6,13 +6,13 @@ import cors from 'cors';
 import reactViews from 'express-react-views';
 
 class App {
-  constructor({ handler, port, sessionKey }) {
+  constructor({ handler, port, sessionKeys }) {
     this._app = express();
     this._app.set('port', port);
     this._app.use(cors());
     this._app.use(cookieSession({
       name: 'heimdall',
-      keys: [sessionKey],
+      keys: sessionKeys,
       httpOnly: true,
       maxAge: 360 * 24 * 60 * 100,
     }));

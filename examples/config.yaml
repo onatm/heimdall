@@ -2,7 +2,8 @@ issuer: http://localhost:5666
 
 mongoURI: mongodb://localhost:27018/heimdall
 
-sessionKey: '!!9873039&&os9d09fxlkjzc'
+sessionKeys:
+- '!!9873039&&os9d09fxlkjzc'
 
 expiry:
   idToken: 21600
