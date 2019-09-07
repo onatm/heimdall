@@ -1,14 +1,21 @@
 import path from 'path';
 
 import express from 'express';
+import cookieSession from 'cookie-session';
 import cors from 'cors';
 import reactViews from 'express-react-views';
 
 class App {
-  constructor({ handler, port }) {
+  constructor({ handler, port, sessionKey }) {
     this._app = express();
     this._app.set('port', port);
     this._app.use(cors());
+    this._app.use(cookieSession({
+      name: 'heimdall',
+      keys: [sessionKey],
+      httpOnly: true,
+      maxAge: 360 * 24 * 60 * 100,
+    }));
 
     this._app.use(express.static(path.join(__dirname, 'public')));
     this._app.set('views', path.join(__dirname, 'views'));

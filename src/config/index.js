@@ -16,6 +16,7 @@ const createConfig = (file) => {
   assert(config.issuer, 'heimdall: issuer is not specified.');
   // TODO: parse and validate issuer
   assert(config.mongoURI, 'heimdall: mongoURI is not specified.');
+  assert(config.sessionKey, 'heimdall: sessionKey is not specified.');
 
   const expiry = { ...defaultExpiry, ...config.expiry };
 

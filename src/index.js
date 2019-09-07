@@ -21,7 +21,7 @@ const options = commandLineArgs(optionDefinitions);
 const port = process.env.PORT || '5666';
 
 const {
-  issuer, mongoURI, expiry, providers, clients,
+  issuer, mongoURI, sessionKey, expiry, providers, clients,
 } = createConfig(fs.readFileSync(options.config, 'utf8'));
 
 const keystore = new JWKS.KeyStore();
@@ -36,7 +36,7 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (
 const store = new Store({ keystore, providers, clients });
 const accountManager = new AccountManager(store);
 const handler = new Handler({ issuer, expiry }, store, accountManager);
-const { app } = new App({ handler, port });
+const { app } = new App({ handler, port, sessionKey });
 
 const server = http.createServer(app);
 server.listen(port);

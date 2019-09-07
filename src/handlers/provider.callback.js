@@ -58,6 +58,9 @@ class ProviderCallbackHandler {
 
     const account = await this.accountManager.findAccount(providerIdentity, providerId);
 
+    req.sessionOptions.maxAge = authReq.maxAge || req.sessionOptions.maxAge;
+    req.session.accountId = account.id;
+
     // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
     let claims = {};
 
