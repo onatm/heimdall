@@ -16,8 +16,9 @@ There are some missing functionality that should be implemented before *v1.0*.
 - [x] Add `memory` store
 - [x] Decision about configurable parameters
 - [x] Pass configuration from `YAML` files
-- [ ] Api resource scopes
+- [ ] Convert `parseAuthorization` function to a middleware
 - [ ] Silent callback
+- [ ] Api resource scopes
 - [ ] Create sample app repository
 - [ ] Encrypt provider `access_token` in `mongodb`
 - [ ] Add logging
