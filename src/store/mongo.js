@@ -2,13 +2,7 @@
 import Account from '../models/account';
 import AuthReq from '../models/authorization.request';
 
-import BaseStore from './base';
-
-class MongoStore extends BaseStore {
-  constructor({ keystore, providers, clients }) {
-    super({ keystore, providers, clients });
-  }
-
+class MongoStore {
   getAuthReq = async id => AuthReq.findOne({ _id: id, expiry: { $gte: new Date().toISOString() }, is_active: true });
 
   createAuthReq = async authReq => new AuthReq({ ...authReq }).save();

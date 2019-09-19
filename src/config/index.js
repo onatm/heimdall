@@ -21,13 +21,13 @@ const createConfig = (file) => {
     throw new Error('heimdall: sessionKey is not specified.');
   }
 
-  const expiry = { ...defaultExpiry, ...config.expiry };
-
   const providers = createProviders(config);
   const clients = createClients(config);
 
+  const expiry = { ...defaultExpiry, ...config.expiry };
+
   return {
-    ...config, expiry, providers, clients,
+    ...config, providers, clients, expiry,
   };
 };
 

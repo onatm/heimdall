@@ -11,7 +11,7 @@ class UserInfo {
   // https://openid.net/specs/openid-connect-core-1_0.html#UserInfo
   // groups are not included to user info
   handle = async (req, res) => {
-    const { authorization } = req.headers;
+    const { ctx: { keystore }, headers: { authorization } } = req;
 
     // header value's length should be greater than "Bearer " (7)
     if (!authorization || authorization.length < 7) {
@@ -27,7 +27,6 @@ class UserInfo {
 
     const accessTokenJwt = authorization.slice(7);
 
-    const { keystore } = this.store;
     const key = keystore.get({ kty: 'RSA' });
 
     const accessToken = verifyAccessToken(accessTokenJwt, key);

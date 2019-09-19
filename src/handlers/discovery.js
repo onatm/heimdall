@@ -2,16 +2,14 @@
 import { supportedResponseTypes, supportedScopes } from '../oauth2/consts';
 
 class DiscoveryHandler {
-  constructor({ issuer }) {
-    this.issuer = issuer;
-  }
+  handle = async (req, res) => {
+    const { ctx: { issuer } } = req;
 
-  handle = async (_, res) => {
     const discovery = {
-      issuer: this.issuer,
-      authorization_endpoint: `${this.issuer}/auth`,
-      jwks_uri: `${this.issuer}/jwks`,
-      userinfo_endpoint: `${this.issuer}/userinfo`,
+      issuer,
+      authorization_endpoint: `${issuer}/auth`,
+      jwks_uri: `${issuer}/jwks`,
+      userinfo_endpoint: `${issuer}/userinfo`,
       scopes_supported: supportedScopes,
       claims_supported:
         [

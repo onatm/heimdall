@@ -6,13 +6,12 @@ import ProviderCallbackHandler from './provider.callback';
 import UserInfoHandler from './user.info';
 
 class Handler {
-  constructor({ issuer, expiry }, store, accountManager) {
-    const { keystore } = store;
-    this._discoveryHandler = new DiscoveryHandler({ issuer });
-    this._keystoreHandler = new KeystoreHandler(keystore);
+  constructor(store, accountManager) {
+    this._discoveryHandler = new DiscoveryHandler();
+    this._keystoreHandler = new KeystoreHandler();
     this._authorizationHandler = new AuthorizationHandler(store);
     this._providerHandler = new ProviderHandler(store);
-    this._providerCallbackHandler = new ProviderCallbackHandler({ issuer, expiry }, store, accountManager);
+    this._providerCallbackHandler = new ProviderCallbackHandler(store, accountManager);
     this._userInfoHandler = new UserInfoHandler(store);
   }
 

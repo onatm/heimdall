@@ -7,9 +7,7 @@ import {
 import { newAccessToken, newIdToken } from '../oauth2';
 
 class ProviderCallbackHandler {
-  constructor({ issuer, expiry }, store, accountManager) {
-    this.issuer = issuer;
-    this.expiry = expiry;
+  constructor(store, accountManager) {
     this.store = store;
     this.accountManager = accountManager;
   }
@@ -17,6 +15,9 @@ class ProviderCallbackHandler {
   handle = async (req, res) => {
     const {
       originalUrl,
+      ctx: {
+        issuer, keystore, providers, expiry,
+      },
       query: { error, error_description: errorDescription, state: authReqId },
       params: { provider: providerId },
     } = req;
@@ -47,7 +48,7 @@ class ProviderCallbackHandler {
       });
     }
 
-    const provider = this.store.getProvider(providerId);
+    const provider = providers.find(p => p.id === providerId);
 
     const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, originalUrl);
 
@@ -112,17 +113,16 @@ class ProviderCallbackHandler {
     // eslint-disable-next-line no-unused-vars
     const _ = await this.store.deleteAuthReq(authReq.id);
 
-    const { keystore } = this.store;
     const key = keystore.get({ kty: 'RSA' });
 
     let accessToken;
 
     if (authReq.responseTypes.includes(responseTypeToken)) {
-      const accessTokenExpiry = now + Math.round(this.expiry.accessToken);
+      const accessTokenExpiry = now + Math.round(expiry.accessToken);
 
       accessToken = newAccessToken(
         key,
-        this.issuer,
+        issuer,
         account.id,
         authReq.audience,
         authReq.clientId,
@@ -131,11 +131,11 @@ class ProviderCallbackHandler {
       );
     }
 
-    const idTokenExpiry = now + Math.round(this.expiry.idToken);
+    const idTokenExpiry = now + Math.round(expiry.idToken);
 
     const idToken = newIdToken(
       key,
-      this.issuer,
+      issuer,
       account.id,
       authReq.clientId,
       authReq.nonce,
@@ -153,7 +153,7 @@ class ProviderCallbackHandler {
       values = {
         token_type: 'bearer',
         access_token: accessToken,
-        expires_in: this.expiry.accessToken,
+        expires_in: expiry.accessToken,
         ...values,
       };
     }

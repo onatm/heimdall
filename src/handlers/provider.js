@@ -4,9 +4,9 @@ class ProviderHandler {
   }
 
   handle = async (req, res) => {
-    const { params: { provider: providerId }, query: { req: authReqId } } = req;
+    const { ctx: { providers }, params: { provider: providerId }, query: { req: authReqId } } = req;
 
-    const provider = this.store.getProvider(providerId);
+    const provider = providers.find(p => p.id === providerId);
 
     if (!provider) {
       res.status(500);

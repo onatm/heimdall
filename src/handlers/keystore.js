@@ -1,10 +1,7 @@
 class KeystoreHandler {
-  constructor(keystore) {
-    this.keystore = keystore;
-  }
-
-  handle = async (_, res) => {
-    res.json(this.keystore.toJWKS(false));
+  handle = async (req, res) => {
+    const { ctx: { keystore } } = req;
+    res.json(keystore.toJWKS(false));
   };
 }
 

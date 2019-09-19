@@ -1,11 +1,8 @@
 /* eslint-disable babel/camelcase */
 import nanoid from 'nanoid';
 
-import BaseStore from './base';
-
-class MemoryStore extends BaseStore {
-  constructor({ keystore, providers, clients }) {
-    super({ keystore, providers, clients });
+class MemoryStore {
+  constructor() {
     this.authRequests = [];
     this.accounts = [];
   }
