@@ -9,7 +9,7 @@ import reactViews from 'express-react-views';
 import checkClient from './handlers/authorization/checks/client';
 import checkRedirectUri from './handlers/authorization/checks/redirect_uri';
 import Context from './context';
-import errorHandler from './handlers/error';
+import handleError from './handlers/error';
 import checkResponseTypes from './handlers/authorization/checks/response_types';
 import checkScopes from './handlers/authorization/checks/scopes';
 import checkMaxAge from './handlers/authorization/checks/max_age';
@@ -74,7 +74,7 @@ class App {
     router.get('/userinfo', userInfoHandler.handle);
 
     this._app.use('/', router);
-    this._app.use(errorHandler);
+    this._app.use(handleError);
   }
 
   get app() {

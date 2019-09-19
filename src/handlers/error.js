@@ -3,7 +3,7 @@ import {
   InvalidClient, UnregisteredRedirectUri, InvalidRequest, UnsupportedResponseType, InvalidScope,
 } from './authorization/checks/errors';
 
-const errorHandler = async (err, req, res, next) => {
+const handleError = async (err, req, res, next) => {
   if (err instanceof InvalidClient || err instanceof UnregisteredRedirectUri) {
     res.status(400);
     return res.render('error', { error: err.message });
@@ -19,4 +19,4 @@ const errorHandler = async (err, req, res, next) => {
   return res.render('error', { error: err });
 };
 
-export default errorHandler;
+export default handleError;
