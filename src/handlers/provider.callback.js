@@ -6,160 +6,153 @@ import {
 } from '../oauth2/consts';
 import { newAccessToken, newIdToken } from '../oauth2';
 
-class ProviderCallbackHandler {
-  constructor(store, accountManager) {
-    this.store = store;
-    this.accountManager = accountManager;
+const handleProviderCallback = async (req, res) => {
+  const {
+    originalUrl,
+    ctx: {
+      issuer, keystore, providers, store, manager, expiry,
+    },
+    query: { error, error_description: errorDescription, state: authReqId },
+    params: { provider: providerId },
+  } = req;
+
+  if (error) {
+    res.status(500);
+    return res.render('error', { error: `${error}: ${errorDescription}` });
   }
 
-  handle = async (req, res) => {
-    const {
-      originalUrl,
-      ctx: {
-        issuer, keystore, providers, expiry,
-      },
-      query: { error, error_description: errorDescription, state: authReqId },
-      params: { provider: providerId },
-    } = req;
+  if (!authReqId) {
+    res.status(400);
+    return res.render('error', { error: 'User session error.' });
+  }
 
-    if (error) {
-      res.status(500);
-      return res.render('error', { error: `${error}: ${errorDescription}` });
-    }
+  const authReq = await store.getAuthReq(authReqId);
 
-    if (!authReqId) {
-      res.status(400);
-      return res.render('error', { error: 'User session error.' });
-    }
+  if (!authReq) {
+    res.status(500);
+    return res.render('error', { error: "Invalid 'state' parameter provided: not found" });
+  }
 
-    const authReq = await this.store.getAuthReq(authReqId);
+  if (providerId !== authReq.providerId) {
+    res.status(500);
+    return res.render('error', {
+      error:
+        `Provider mismatch: authentication started with id ${authReq.providerId},`
+        + ` but callback for id ${providerId} was triggered`,
+    });
+  }
 
-    if (!authReq) {
-      res.status(500);
-      return res.render('error', { error: "Invalid 'state' parameter provided: not found" });
-    }
+  const provider = providers.find(p => p.id === providerId);
 
-    if (providerId !== authReq.providerId) {
-      res.status(500);
-      return res.render('error', {
-        error:
-          `Provider mismatch: authentication started with id ${authReq.providerId},`
-          + ` but callback for id ${providerId} was triggered`,
-      });
-    }
+  const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, originalUrl);
 
-    const provider = providers.find(p => p.id === providerId);
+  if (providerIdentity.error) {
+    res.status(500);
+    return res.render('error', { error: providerIdentity.error });
+  }
 
-    const providerIdentity = await provider.handleCallback(authReq.id, authReq.scopes, originalUrl);
+  const account = await manager.findAccount(providerIdentity, providerId);
 
-    if (providerIdentity.error) {
-      res.status(500);
-      return res.render('error', { error: providerIdentity.error });
-    }
+  req.sessionOptions.maxAge = authReq.maxAge || req.sessionOptions.maxAge;
+  req.session.accountId = account.id;
 
-    const account = await this.accountManager.findAccount(providerIdentity, providerId);
+  // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
+  let claims = {};
 
-    req.sessionOptions.maxAge = authReq.maxAge || req.sessionOptions.maxAge;
-    req.session.accountId = account.id;
+  if (authReq.scopes.includes(scopeProfile)) {
+    claims = {
+      name: account.name,
+      preferred_username: account.username,
+    };
+  }
 
-    // check scopes to create claims https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
-    let claims = {};
-
-    if (authReq.scopes.includes(scopeProfile)) {
-      claims = {
-        name: account.name,
-        preferred_username: account.username,
-      };
-    }
-
-    if (authReq.scopes.includes(scopeEmail)) {
-      claims = {
-        ...claims,
-        email: account.email,
-        email_verified: true,
-      };
-    }
-
-    const now = Math.floor(new Date().getTime() / 1000);
-
-    if (authReq.maxAge) {
-      claims = {
-        ...claims,
-        auth_time: now,
-      };
-    }
-
-    if (authReq.scopes.includes(scopeGroups)) {
-      claims = {
-        ...claims,
-        groups: providerIdentity.groups,
-      };
-    }
-
+  if (authReq.scopes.includes(scopeEmail)) {
     claims = {
       ...claims,
-      provider_claims: {
-        id: providerId,
-        user_id: providerIdentity.id,
-      },
-      updated_at: account.updated_at,
+      email: account.email,
+      email_verified: true,
     };
+  }
 
-    // no need for approval. heimdall authenticates users only using external providers
-    // if approval flow ever gets implemented then authReq should be updated with identity
-    // and loggedIn flag
-    // also there could be some use of authReq.expiry
+  const now = Math.floor(new Date().getTime() / 1000);
 
-    // eslint-disable-next-line no-unused-vars
-    const _ = await this.store.deleteAuthReq(authReq.id);
+  if (authReq.maxAge) {
+    claims = {
+      ...claims,
+      auth_time: now,
+    };
+  }
 
-    const key = keystore.get({ kty: 'RSA' });
+  if (authReq.scopes.includes(scopeGroups)) {
+    claims = {
+      ...claims,
+      groups: providerIdentity.groups,
+    };
+  }
 
-    let accessToken;
+  claims = {
+    ...claims,
+    provider_claims: {
+      id: providerId,
+      user_id: providerIdentity.id,
+    },
+    updated_at: account.updated_at,
+  };
 
-    if (authReq.responseTypes.includes(responseTypeToken)) {
-      const accessTokenExpiry = now + Math.round(expiry.accessToken);
+  // no need for approval. heimdall authenticates users only using external providers
+  // if approval flow ever gets implemented then authReq should be updated with identity
+  // and loggedIn flag
+  // also there could be some use of authReq.expiry
 
-      accessToken = newAccessToken(
-        key,
-        issuer,
-        account.id,
-        authReq.audience,
-        authReq.clientId,
-        authReq.scopes,
-        accessTokenExpiry,
-      );
-    }
+  // eslint-disable-next-line no-unused-vars
+  const _ = await store.deleteAuthReq(authReq.id);
 
-    const idTokenExpiry = now + Math.round(expiry.idToken);
+  const key = keystore.get({ kty: 'RSA' });
 
-    const idToken = newIdToken(
+  let accessToken;
+
+  if (authReq.responseTypes.includes(responseTypeToken)) {
+    const accessTokenExpiry = now + Math.round(expiry.accessToken);
+
+    accessToken = newAccessToken(
       key,
       issuer,
       account.id,
+      authReq.audience,
       authReq.clientId,
-      authReq.nonce,
-      claims,
-      accessToken,
-      idTokenExpiry,
+      authReq.scopes,
+      accessTokenExpiry,
     );
+  }
 
-    let values = {
-      id_token: idToken,
-      state: authReq.state,
-    };
+  const idTokenExpiry = now + Math.round(expiry.idToken);
 
-    if (accessToken) {
-      values = {
-        token_type: 'bearer',
-        access_token: accessToken,
-        expires_in: expiry.accessToken,
-        ...values,
-      };
-    }
+  const idToken = newIdToken(
+    key,
+    issuer,
+    account.id,
+    authReq.clientId,
+    authReq.nonce,
+    claims,
+    accessToken,
+    idTokenExpiry,
+  );
 
-    return res.redirect(`${authReq.redirectURI}#${querystring.stringify(values)}`);
+  let values = {
+    id_token: idToken,
+    state: authReq.state,
   };
-}
 
-export default ProviderCallbackHandler;
+  if (accessToken) {
+    values = {
+      token_type: 'bearer',
+      access_token: accessToken,
+      expires_in: expiry.accessToken,
+      ...values,
+    };
+  }
+
+  return res.redirect(`${authReq.redirectURI}#${querystring.stringify(values)}`);
+};
+
+export default handleProviderCallback;

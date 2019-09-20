@@ -6,18 +6,24 @@ import cookieSession from 'cookie-session';
 import cors from 'cors';
 import reactViews from 'express-react-views';
 
+import Context from './context';
 import checkClient from './handlers/authorization/checks/client';
 import checkRedirectUri from './handlers/authorization/checks/redirect_uri';
-import Context from './context';
-import handleError from './handlers/error';
 import checkResponseTypes from './handlers/authorization/checks/response_types';
 import checkScopes from './handlers/authorization/checks/scopes';
 import checkMaxAge from './handlers/authorization/checks/max_age';
 import checkPrompts from './handlers/authorization/checks/prompt';
+import handleError from './handlers/error';
+import handleUserInfo from './handlers/user.info';
+import handleProvider from './handlers/provider';
+import handleKeystore from './handlers/keystore';
+import handleProviderCallback from './handlers/provider.callback';
+import handleDiscovery from './handlers/discovery';
+import handleAuthorization from './handlers/authorization';
 
 class App {
   constructor({
-    issuer, keystore, clients, providers, expiry, handler, port, sessionKeys,
+    issuer, keystore, clients, providers, store, manager, expiry, port, sessionKeys,
   }) {
     this._app = express();
     this._app.set('port', port);
@@ -44,7 +50,7 @@ class App {
     this._app.use((req, _, next) => {
       Object.defineProperty(req, 'ctx', {
         value: new Context({
-          issuer, keystore, clients, providers, expiry,
+          issuer, keystore, clients, providers, store, manager, expiry,
         }),
       });
       next();
@@ -52,26 +58,22 @@ class App {
 
     const router = express.Router();
 
-
-    const {
-      discoveryHandler, keystoreHandler, authorizationHandler, providerHandler, providerCallbackHandler, userInfoHandler,
-    } = handler;
-
-    const authChecks = [
+    const authHandlers = [
       checkClient,
       checkRedirectUri,
       checkScopes,
       checkResponseTypes,
       checkMaxAge,
       checkPrompts,
+      handleAuthorization,
     ];
 
-    router.get('/.well-known/openid-configuration', discoveryHandler.handle);
-    router.get('/jwks', keystoreHandler.handle);
-    router.get('/auth', authChecks, authorizationHandler.handle);
-    router.get('/auth/:provider', providerHandler.handle);
-    router.get('/auth/:provider/callback', providerCallbackHandler.handle);
-    router.get('/userinfo', userInfoHandler.handle);
+    router.get('/.well-known/openid-configuration', handleDiscovery);
+    router.get('/jwks', handleKeystore);
+    router.get('/auth', authHandlers);
+    router.get('/auth/:provider', handleProvider);
+    router.get('/auth/:provider/callback', handleProviderCallback);
+    router.get('/userinfo', handleUserInfo);
 
     this._app.use('/', router);
     this._app.use(handleError);

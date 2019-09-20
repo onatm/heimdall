@@ -8,7 +8,6 @@ import { JWKS } from '@panva/jose';
 
 import App from './app';
 import Store from './store';
-import Handler from './handlers';
 import AccountManager from './account/manager';
 import createConfig from './config';
 
@@ -34,10 +33,9 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (
 });
 
 const store = new Store();
-const accountManager = new AccountManager(store);
-const handler = new Handler(store, accountManager);
+const manager = new AccountManager(store);
 const { app } = new App({
-  issuer, keystore, clients, providers, expiry, handler, port, sessionKeys,
+  issuer, keystore, clients, providers, store, manager, expiry, port, sessionKeys,
 });
 
 const server = http.createServer(app);
