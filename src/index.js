@@ -26,7 +26,7 @@ const {
 const keystore = new JWKS.KeyStore();
 keystore.generateSync('RSA', 2048, { use: 'sig' });
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useFindAndModify: false }, (err) => {
+mongoose.connect(mongoURI, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false }, (err) => {
   if (err) {
     throw err;
   }
