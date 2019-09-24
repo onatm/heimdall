@@ -10,7 +10,7 @@ import App from './app';
 import Store from './store';
 import AccountManager from './account/manager';
 import createConfig from './config';
-import log from './log';
+import logger from './logger';
 
 const optionDefinitions = [
   { name: 'config', alias: 'c', type: String },
@@ -19,7 +19,7 @@ const optionDefinitions = [
 const options = commandLineArgs(optionDefinitions);
 
 process.on('unhandledRejection', (err) => {
-  log.error(err);
+  logger.error(err);
   process.exit(1);
 });
 
@@ -49,7 +49,7 @@ server.listen(port);
 
 server.on('listening', () => {
   const addr = server.address();
-  log.info(`Listening on port ${addr.port}!`);
+  logger.info(`Listening on port ${addr.port}!`);
 });
 
 server.on('error', (error) => {
@@ -61,11 +61,11 @@ server.on('error', (error) => {
 
   switch (error.code) {
     case 'EACCES':
-      log.error(`${bind} requires elevated privileges`);
+      logger.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      log.error(`${bind} is already in use`);
+      logger.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:

@@ -21,14 +21,14 @@ import handleKeystore from './handlers/keystore';
 import handleProviderCallback from './handlers/provider.callback';
 import handleDiscovery from './handlers/discovery';
 import handleAuthorization from './handlers/authorization';
-import log from './log';
+import logger from './logger';
 
 class App {
   constructor({
     issuer, keystore, clients, providers, store, manager, expiry, port, sessionKeys,
   }) {
     this._app = express();
-    this._app.use(morgan('short', { stream: { write: message => log.info(message) } }));
+    this._app.use(morgan('short', { stream: { write: message => logger.info(message) } }));
     this._app.set('port', port);
     this._app.use(helmet({
       contentSecurityPolicy: {
