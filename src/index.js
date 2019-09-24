@@ -10,12 +10,18 @@ import App from './app';
 import Store from './store';
 import AccountManager from './account/manager';
 import createConfig from './config';
+import log from './log';
 
 const optionDefinitions = [
   { name: 'config', alias: 'c', type: String },
 ];
 
 const options = commandLineArgs(optionDefinitions);
+
+process.on('unhandledRejection', (err) => {
+  log.error(err);
+  process.exit(1);
+});
 
 const port = process.env.PORT || '5666';
 
@@ -42,8 +48,8 @@ const server = http.createServer(app);
 server.listen(port);
 
 server.on('listening', () => {
-  // const addr = server.address();
-  // log.info(`Listening on port ${addr.port}!`);
+  const addr = server.address();
+  log.info(`Listening on port ${addr.port}!`);
 });
 
 server.on('error', (error) => {
@@ -51,15 +57,15 @@ server.on('error', (error) => {
     throw error;
   }
 
-  // const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
+  const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
 
   switch (error.code) {
     case 'EACCES':
-      // log.error(`${bind} requires elevated privileges`);
+      log.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      // log.error(`${bind} is already in use`);
+      log.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
