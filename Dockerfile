@@ -1,4 +1,4 @@
-FROM node:12 as build
+FROM node:12.9.1 as build
 
 WORKDIR /usr/src/heimdall
 
@@ -10,7 +10,7 @@ COPY . ./
 
 RUN npm run build
 
-FROM node:12-alpine
+FROM node:12.9.1-alpine
 
 WORKDIR /app
 
