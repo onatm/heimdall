@@ -1,0 +1,14 @@
+name: Heimdall CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build heimdall docker image
+      run: docker build . --file Dockerfile --tag onatm/heimdall:$(date +%s)
