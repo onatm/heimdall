@@ -53,7 +53,7 @@ class App {
     this._app.use((req, _, next) => {
       Object.defineProperty(req, 'ctx', {
         value: new Context({
-          issuer, keystore, clients, providers, store, manager, expiry,
+          params: { ...req.query, ...req.params }, issuer, keystore, clients, providers, store, manager, expiry,
         }),
       });
       next();

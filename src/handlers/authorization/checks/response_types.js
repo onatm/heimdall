@@ -1,15 +1,10 @@
 import wrap from '../../wrap';
 import { responseTypeIdToken, responseTypeToken, supportedResponseTypes } from '../../../oauth2/consts';
-import { parseAsArray } from '../../utils';
 
 import { InvalidRequest, UnsupportedResponseType } from './errors';
 
 const checkResponseTypes = wrap(async (req, res, next) => {
-  const { query: { nonce }, ctx } = req;
-
-  ctx.nonce = nonce;
-
-  const responseTypes = parseAsArray(req.query.response_type);
+  const { ctx: { responseTypes, nonce } } = req;
 
   if (responseTypes.length === 0) {
     throw new InvalidRequest('No response_type provided');
@@ -38,7 +33,6 @@ const checkResponseTypes = wrap(async (req, res, next) => {
     throw new InvalidRequest('Response type \'token\' requires a \'nonce\' value');
   }
 
-  ctx.responseTypes = responseTypes;
   return next();
 });
 

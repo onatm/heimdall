@@ -2,15 +2,12 @@ import wrap from '../../wrap';
 import {
   scopeOpenId, scopeProfile, scopeEmail, scopeGroups, scopeAudiencePrefix,
 } from '../../../oauth2/consts';
-import { parseAsArray } from '../../utils';
 
 import { InvalidScope } from './errors';
 
 const checkScopes = wrap(async (req, res, next) => {
   const { ctx } = req;
-  const { client } = ctx;
-
-  const scopes = parseAsArray(req.query.scope);
+  const { client, scopes } = ctx;
 
   if (!scopes.includes(scopeOpenId)) {
     throw new InvalidScope('Missing required scope(s) [\'openid\']');
@@ -43,8 +40,8 @@ const checkScopes = wrap(async (req, res, next) => {
     throw new InvalidScope(`Client cannot request scope(s) ${invalidScopes.join(', ')}`);
   }
 
-  ctx.scopes = scopes;
-  ctx.audience = audience;
+  ctx.authorization('Audience', audience);
+
   return next();
 });
 

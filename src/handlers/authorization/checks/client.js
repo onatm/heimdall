@@ -3,7 +3,8 @@ import wrap from '../../wrap';
 import { InvalidClient } from './errors';
 
 const checkClient = wrap(async (req, res, next) => {
-  const { ctx, query: { client_id: clientId } } = req;
+  const { ctx } = req;
+  const { clientId } = ctx;
 
   const client = ctx.clients.find(c => c.id === clientId);
 
@@ -11,7 +12,8 @@ const checkClient = wrap(async (req, res, next) => {
     throw new InvalidClient(`Invalid client_id (${clientId})`);
   }
 
-  ctx.client = client;
+  ctx.authorization('Client', client);
+
   return next();
 });
 

@@ -1,13 +1,10 @@
 import wrap from '../../wrap';
 import { promptLogin, promptNone, promptTypes } from '../../../oauth2/consts';
-import { parseAsArray } from '../../utils';
 
 import { InvalidRequest } from './errors';
 
 const checkPrompts = wrap(async (req, res, next) => {
-  const { ctx, query } = req;
-
-  const prompt = parseAsArray(query.prompt);
+  const { ctx: { prompt } } = req;
 
   if (prompt.length === 0) {
     prompt.push(promptLogin);
@@ -23,7 +20,6 @@ const checkPrompts = wrap(async (req, res, next) => {
     throw new InvalidRequest('prompt \'none\' cannot be used with other values');
   }
 
-  ctx.prompt = prompt;
   return next();
 });
 

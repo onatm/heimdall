@@ -5,7 +5,7 @@ const handleAuthorization = wrap(async (req, res) => {
     ctx: {
       providers,
       store,
-      client: { id: clientId }, audience, responseTypes, scopes, state, nonce, redirectURI, maxAge, prompt,
+      clientId, audience, responseTypes, scopes, state, nonce, redirectURI, maxAge, prompt,
     },
   } = req;
 
